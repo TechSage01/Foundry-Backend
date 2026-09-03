@@ -1,0 +1,32 @@
+{
+  "name": "foundry-backend",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/TechSage01/Foundry-Backend#readme",
+  "bugs": {
+    "url": "https://github.com/TechSage01/Foundry-Backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TechSage01/Foundry-Backend.git"
+  },
+  "license": "ISC",
+  "author": "Habeeb, Techsage",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "tsc && nodemon dist/server.js"
+  },
+  "dependencies": {
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.1",
+    "typescript": "^7.0.2"
+  }
+}
