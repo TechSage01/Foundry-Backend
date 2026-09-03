@@ -1,15 +1,56 @@
 import express from "express";
-import { Request, Response } from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import session from "express-session";
+import passport from "./config/passport.js";
+import appRouter from "./routes/app.js";
+import authRouter from "./routes/auth.js"
+import pool from "./config/db.js";
 
+dotenv.config();
 const app = express();
 
-app.get("/", (req: Request, res: Response) => {
-  return res.status(200).json({ success: true, message: "System is up and running" })
+// middlewares
+app.use((req, res, next) => {
+  cors({
+    origin: [process.env.CLIENT_URL!],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })(req, res, next)
 })
+app.use(express.json())
+app.use(cookieParser())
+app.use(session({
+  secret: process.env.SESSION_SECRET!,
+  resave: false,
+  saveUninitialized: false
+}))
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/", appRouter)
+app.use("/api/auth", authRouter)
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`)
-})
+const startServer = async () => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT NOW()');
+    client.release();
+
+    console.log("Connected to PostgresSQL")
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`)
+    })
+  } catch (err) {
+    console.error("Failed to connect to database: ", err)
+    process.exit(1);
+  }
+}
+
+startServer();
 
