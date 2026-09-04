@@ -4,7 +4,7 @@ import { Strategy as GithubStrategy, Profile as GithubProfile } from "passport-g
 import pool from "./db.js";
 import { v4 as uuidv4 } from "uuid";
 
-// ------ Github Stratey ------
+// ------ Github Strategy ------
 passport.use(
   new GithubStrategy({
     clientID: process.env.GITHUB_CLIENT_ID!,
