@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RESERVED_USERNAMES } from "../utils/list.js";
 import pool from "../config/db.js";
-import { updateProfileSchema } from "../utils/validator.js";
+import { updateProfileSchema } from "../schemas/profile.js";
 
 export const updateProfile = async (req: Request, res: Response) => {
   try {
