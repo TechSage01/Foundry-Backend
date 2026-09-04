@@ -9,6 +9,7 @@ import authRouter from "./routes/auth.js"
 import profileRouter from "./routes/profile.js"
 import projectRouter from "./routes/projects.js"
 import pool from "./config/db.js";
+import logger from "./middlewares/logger.js";
 
 dotenv.config();
 const app = express();
@@ -24,6 +25,7 @@ app.use((req, res, next) => {
 })
 app.use(express.json())
 app.use(cookieParser())
+app.use(logger)
 app.use(session({
   secret: process.env.SESSION_SECRET!,
   resave: false,
