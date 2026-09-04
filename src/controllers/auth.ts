@@ -13,8 +13,8 @@ export const googleCallback = (req: Request, res: Response) => {
       maxAge: 24 * 60 *60 * 1000
     })
 
-    res.redirect(`${process.env.CLIENT_URL}/home`)
+    res.redirect(`${process.env.CLIENT_URL}`)
   } catch (error) {
-    res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_failed`)
+    res.redirect(`${process.env.CLIENT_URL}`)
   }
 }

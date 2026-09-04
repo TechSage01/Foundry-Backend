@@ -7,7 +7,7 @@ const router = Router();
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get("/google/callback", 
   passport.authenticate('google', {
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=oauth_failed`,
+    failureRedirect: `${process.env.CLIENT_URL}`,
     session: false
   }),
   googleCallback
