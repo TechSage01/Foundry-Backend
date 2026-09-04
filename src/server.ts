@@ -7,6 +7,7 @@ import passport from "./config/passport.js";
 import appRouter from "./routes/app.js";
 import authRouter from "./routes/auth.js"
 import profileRouter from "./routes/profile.js"
+import projectRouter from "./routes/projects.js"
 import pool from "./config/db.js";
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use(passport.session());
 app.use("/", appRouter)
 app.use("/api/auth", authRouter)
 app.use("/api/profile", profileRouter)
+app.use("/api/projects", projectRouter)
 
 const PORT = process.env.PORT || 5000;
 
