@@ -6,6 +6,7 @@ import session from "express-session";
 import passport from "./config/passport.js";
 import appRouter from "./routes/app.js";
 import authRouter from "./routes/auth.js"
+import profileRouter from "./routes/profile.js"
 import pool from "./config/db.js";
 
 dotenv.config();
@@ -30,8 +31,10 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// routes
 app.use("/", appRouter)
 app.use("/api/auth", authRouter)
+app.use("/api/profile", profileRouter)
 
 const PORT = process.env.PORT || 5000;
 
