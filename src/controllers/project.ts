@@ -4,8 +4,11 @@ import { slugify } from "../utils/helpers.js";
 import { v4 as uuidv4 } from "uuid";
 import pool from "../config/db.js";
 import { Project } from "../types/projects.js";
-import { type Profile } from "../types/user.js";
 
+
+// @route POST /api/projects
+// @desc Create new project
+// @access Authenticated users only
 export const createProject = async (req: Request, res: Response) => {
   const { id } = req.user as { id: string }
 
@@ -36,10 +39,14 @@ export const createProject = async (req: Request, res: Response) => {
   }
 }
 
+
 export const getAllProject = async (req: Request, res: Response) => {
 
 }
 
+// @route GET /api/projects/{slug}
+// @desc Get a single project
+// @access Public
 export const getProject = async (req: Request, res: Response) => {
   const { slug } = req.params;
 
@@ -78,6 +85,9 @@ export const getProject = async (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/projects/user/{username}
+// @desc Get all projects from a user
+// @access Public
 export const getUserProjects = async (req: Request, res: Response) => {
   const { username } = req.params;
 
@@ -96,6 +106,6 @@ export const getUserProjects = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "", data: rows })
   } catch (error) {
-    return res.status(500).json({ success: false, message: "" })
+    return res.status(500).json({ success: false, message: "Failed to fetch Projects" })
   }
 }

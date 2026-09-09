@@ -3,6 +3,9 @@ import { RESERVED_USERNAMES } from "../utils/list.js";
 import pool from "../config/db.js";
 import { updateProfileSchema } from "../schemas/profile.js";
 
+// @route PUT /api/profile
+// @desc Update profile
+// @access Authenticated users only
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const { id } = req.user as { id: string }

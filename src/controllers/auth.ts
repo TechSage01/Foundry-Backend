@@ -19,6 +19,9 @@ export const issueCallbackToken = (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/auth/me
+// @desc Get user details
+// @access Authenticated users only
 export const getMe = (req: Request, res: Response) => {
   try {
     const user = req.user as any
