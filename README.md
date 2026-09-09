@@ -2,18 +2,19 @@
 
 ## API Routes
 
-### Authentication
-
-| Method | Endpoint           | Description         |
-| ------ | ------------------ | ------------------- |
-| `GET`  | `/api/auth/google` | Sign in with Google |
-| `GET`  | `/api/auth/github` | Sign in with GitHub |
+| Method | Endpoint               | Description         |
+| ------ | ---------------------- | ------------------- |
+| `GET`  | `/api/auth/google`     | Sign in with Google |
+| `GET`  | `/api/auth/github`     | Sign in with GitHub |
+| `PUT`  | `/api/profile`         | Update profile      |
+| `POST` | `/api/projects`        | Create new project  |
+| `GET`  | `/api/projects/{slug}` | Get a project       |
 
 ---
 
-### Profile
+## Docs
 
-#### Update Profile
+---
 
 **`PUT /api/profile`**
 
@@ -35,22 +36,7 @@ Updates the authenticated user's profile.
 }
 ```
 
-**Validation**
-
-| Field            | Rules                                                             |
-| ---------------- | ----------------------------------------------------------------- |
-| `username`       | Optional. 3–30 characters; letters, numbers, and underscores only |
-| `headline`       | Optional. Maximum 100 characters                         |
-| `bio`            | Optional. Maximum 500 characters                         |
-| `location`       | Optional. Maximum 50 characters                          |
-| `skills`         | Optional. Array of strings                               |
-| `external_links` | Optional. Key-value object containing string URLs        |
-
 ---
-
-### Projects
-
-#### Create Project
 
 **`POST /api/projects`**
 
@@ -70,16 +56,3 @@ Creates a new project for the authenticated user.
   "is_published": true
 }
 ```
-
-**Validation**
-
-| Field             | Rules                                  |
-| ----------------- | -------------------------------------- |
-| `title`           | Required. 2–100 characters             |
-| `tagline`         | Required. 5–200 characters             |
-| `description`     | Optional                      |
-| `cover_image_url` | Optional. Must be a valid URL |
-| `demo_url`        | Optional. Must be a valid URL |
-| `github_url`      | Optional. Must be a valid URL |
-| `tech_stack`      | Array of strings. Defaults to `[]`     |
-| `is_published`    | Boolean. Defaults to `true`            |
