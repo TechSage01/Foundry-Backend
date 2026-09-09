@@ -11,4 +11,13 @@ export const createProjectSchema = z.object({
   is_published: z.boolean().default(true),
 });
 
-export const updateProjectSchema = createProjectSchema.partial();
+export const updateProjectSchema = z.object({
+  title: z.string().min(2).max(100).optional(),
+  tagline: z.string().min(5).max(200).optional(),
+  description: z.string().optional().nullable(),
+  cover_image_url: z.string().url().optional().nullable(),
+  demo_url: z.string().url().optional().nullable(),
+  github_url: z.string().url().optional().nullable(),
+  tech_stack: z.array(z.string()).optional(),
+  is_published: z.boolean().optional(),
+});

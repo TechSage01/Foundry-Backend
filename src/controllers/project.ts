@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
-import { createProjectSchema } from "../schemas/project.js";
+import { createProjectSchema, updateProjectSchema } from "../schemas/project.js";
 import { slugify } from "../utils/helpers.js";
 import { v4 as uuidv4 } from "uuid";
 import pool from "../config/db.js";
 import { Project } from "../types/projects.js";
-
 
 // @route POST /api/projects
 // @desc Create new project
@@ -50,6 +49,10 @@ export const getAllProject = async (req: Request, res: Response) => {
 export const getProject = async (req: Request, res: Response) => {
   const { slug } = req.params;
 
+  if (slug === "") {
+    return res.status(400).json({ success: false, message: "Invalid Slug" })
+  }
+
   try {
     const { rows } = await pool.query(
       `UPDATE projects
@@ -91,6 +94,10 @@ export const getProject = async (req: Request, res: Response) => {
 export const getUserProjects = async (req: Request, res: Response) => {
   const { username } = req.params;
 
+  if (username === "") {
+    return res.status(400).json({ success: false, message: "Invalid Username" })
+  }
+
   try {
     const { rows } = await pool.query(`
       SELECT p.*
@@ -107,5 +114,58 @@ export const getUserProjects = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, message: "", data: rows })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch Projects" })
+  }
+}
+
+// @route PUT /api/projects/{id}
+// @desc Update a project
+// @access Owner only
+export const updateProject = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (id === "") {
+    return res.status(400).json({ success: false, message: "Id Missing" })
+  }
+
+  const validation = updateProjectSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+  }
+
+  if (!validation.data || Object.keys(validation.data).length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "At least one field must be provided to update",
+    });
+  }
+
+  const { title, tagline, description, cover_image_url, demo_url, github_url, tech_stack, is_published } = validation.data;
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE projects
+       SET
+         title = COALESCE($1, title),
+         tagline = COALESCE($2, tagline),
+         description = COALESCE($3, description),
+         cover_image_url = COALESCE($4, cover_image_url),
+         demo_url = COALESCE($5, demo_url),
+         github_url = COALESCE($6, github_url),
+         tech_stack = COALESCE($7, tech_stack),
+         is_published = COALESCE($8, is_published),
+         updated_at = NOW()
+       WHERE id = $9 AND user_id = $10
+       RETURNING *`,
+      [title, tagline, description, cover_image_url, demo_url, github_url, tech_stack, is_published, id, userId]
+    );
+
+    if (!rows[0]) {
+      return res.status(404).json({ success: false, message: "Project Not Found" })
+    }
+
+    return res.status(200).json({ success: true, message: "Project Updated" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update project" })
   }
 }
