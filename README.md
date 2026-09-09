@@ -2,13 +2,14 @@
 
 ## API Routes
 
-| Method | Endpoint               | Description         |
-| ------ | ---------------------- | ------------------- |
-| `GET`  | `/api/auth/google`     | Sign in with Google |
-| `GET`  | `/api/auth/github`     | Sign in with GitHub |
-| `PUT`  | `/api/profile`         | Update profile      |
-| `POST` | `/api/projects`        | Create new project  |
-| `GET`  | `/api/projects/{slug}` | Get a project       |
+| Method | Endpoint                        | Description         |
+| ------ | ----------------------          | ------------------- |
+| `GET`  | `/api/auth/google`              | Sign in with Google |
+| `GET`  | `/api/auth/github`              | Sign in with GitHub |
+| `PUT`  | `/api/profile`                  | Update profile      |
+| `POST` | `/api/projects`                 | Create new project  |
+| `GET`  | `/api/projects/{slug}`          | Get a project       |
+| `GET`  | `/api/projects/user/{username}` | Get all projects from a user |
 
 ---
 
@@ -46,13 +47,13 @@ Creates a new project for the authenticated user.
 
 ```json
 {
-  "title": "My Project",
-  "tagline": "A short description of my project",
-  "description": "A detailed description of the project.",
-  "cover_image_url": "https://example.com/cover.png",
-  "demo_url": "https://example.com",
-  "github_url": "https://github.com/username/project",
-  "tech_stack": ["React", "TypeScript", "Go", "PostgreSQL"],
-  "is_published": true
+  "title": "string",
+  "tagline": "string",
+  "description": "string | null",
+  "cover_image_url": "string | null",
+  "demo_url": "string | null",
+  "github_url": "string | null",
+  "tech_stack": ["string"],
+  "is_published": "boolean <false for draft>"
 }
 ```

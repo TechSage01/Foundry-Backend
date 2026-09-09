@@ -4,6 +4,7 @@ import { slugify } from "../utils/helpers.js";
 import { v4 as uuidv4 } from "uuid";
 import pool from "../config/db.js";
 import { Project } from "../types/projects.js";
+import { type Profile } from "../types/user.js";
 
 export const createProject = async (req: Request, res: Response) => {
   const { id } = req.user as { id: string }
@@ -33,6 +34,10 @@ export const createProject = async (req: Request, res: Response) => {
     console.error('Error creating project:', err);
     return res.status(500).json({ success: false, message: 'Failed to create project' });
   }
+}
+
+export const getAllProject = async (req: Request, res: Response) => {
+
 }
 
 export const getProject = async (req: Request, res: Response) => {
@@ -70,5 +75,27 @@ export const getProject = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, message: "", data })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch projects details" })
+  }
+}
+
+export const getUserProjects = async (req: Request, res: Response) => {
+  const { username } = req.params;
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT p.*
+      FROM projects p
+      JOIN profiles prof ON p.user_id = prof.user_id
+      WHERE LOWER(username) = LOWER($1) AND is_published = true
+      ORDER BY p.created_at DESC
+    `, [username])
+
+    if (rows.length < 1) {
+      return res.status(404).json({ success: false, message: "Projects Not Found" })
+    }
+
+    return res.status(200).json({ success: true, message: "", data: rows })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "" })
   }
 }
