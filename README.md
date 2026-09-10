@@ -6,6 +6,7 @@
 | ------ | ------------------------------- | ---------------------------- |
 | `GET`  | `/api/auth/google`              | Sign in with Google          |
 | `GET`  | `/api/auth/github`              | Sign in with GitHub          |
+| `GET`  | `/api/auth/me`                  | Fetch user                   |
 | `PUT`  | `/api/profile`                  | Update profile               |
 | `POST` | `/api/projects`                 | Create new project           |
 | `GET`  | `/api/projects/{slug}`          | Get a project                |
