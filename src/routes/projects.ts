@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createProject, deleteProject, getProject, getUserProjects, updateProject } from "../controllers/project.js";
+import { createProject, deleteProject, fetchProjects, getProject, getUserProjects, updateProject } from "../controllers/project.js";
 
 const router = Router();
 
 // public
+router.get("/", fetchProjects)
 router.get("/:slug", getProject)
 router.get("/user/:username", getUserProjects)
 

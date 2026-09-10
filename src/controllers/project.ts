@@ -38,9 +38,59 @@ export const createProject = async (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/projects
+// @desc Fetch projects
+// @access Public
+export const fetchProjects = async (req: Request, res: Response) => {
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit
+  const tag = req.query.tag as string | undefined;
 
-export const getAllProject = async (req: Request, res: Response) => {
+  try {
+    let query = `
+      SELECT 
+        p.id,
+        p.title,
+        p.slug,
+        p.tagline,
+        p.description,
+        p.cover_image_url,
+        p.demo_url,
+        p.github_url,
+        p.tech_stack,
+        p.views_count,
+        p.created_at,
+        prof.username,
+        prof.full_name,
+        prof.avatar_url
+      FROM projects p
+      JOIN profiles prof ON p.user_id = prof.user_id
+      WHERE p.is_published = true
+    `;
 
+    const params: (string | number)[] = [];
+
+    // filter by tech stack array
+    if (tag) {
+      params.push(tag);
+      query += ` AND $${params.length} = ANY(p.tech_stack)`;
+    }
+
+    params.push(limit, offset)
+    query += ` ORDER BY p.created_at DESC LIMIT $${params.length -1} OFFSET $${params.length}`;
+
+    const { rows } = await pool.query(query, params);
+
+    return res.status(200).json({
+      success: true,
+      count: rows.length,
+      page,
+      data: rows,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: 'Failed to fetch projects' }); 
+  }
 }
 
 // @route GET /api/projects/{slug}

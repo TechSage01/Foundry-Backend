@@ -9,6 +9,7 @@
 | `GET`    | `/api/auth/me`                  | Fetch user                   |
 | `PUT`    | `/api/profile`                  | Update profile               |
 | `POST`   | `/api/projects`                 | Create new project           |
+| `GET`    | `/api/projects`                 | Fetch all published projects |
 | `GET`    | `/api/projects/{slug}`          | Get a project                |
 | `GET`    | `/api/projects/user/{username}` | Get all projects from a user |
 | `PUT`    | `/api/projects/{id}`            | Update project               | 
@@ -39,6 +40,7 @@ Updates the authenticated user's profile.
   }
 }
 ```
+<br>
 
 ---
 
@@ -60,6 +62,24 @@ Creates a new project for the authenticated user.
   "is_published": "boolean <false for draft>"
 }
 ```
+<br>
+
+---
+
+**`GET /api/projects`**
+
+Fetches a paginated list of published projects with optional technology tag filtering.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `12` | Number of items per page (max 50) |
+| `tag` | `string` | No | `null` | Filter projects by tech stack tag (e.g., `Go`) |
+
+
+<br>
 
 ---
 
@@ -81,3 +101,5 @@ Update an existing project for the authenticated user.
   "is_published": "boolean <false for draft>"
 }
 ```
+
+---
