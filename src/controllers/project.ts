@@ -169,3 +169,29 @@ export const updateProject = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to update project" })
   }
 }
+
+// @route DELETE /api/projects/{id}
+// @desc Delete a project
+// @access Owner only
+export const deleteProject = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: "Project ID is required" })
+  }
+
+  try {
+    const { rowCount } = await pool.query(`
+      DELETE FROM projects WHERE id = $1 AND user_id = $2
+    `, [id, userId])
+
+    if (rowCount === 0) {
+      return res.status(404).json({ success: false, message: "Project Not Found." })
+    }
+
+    return res.status(200).json({ success: true, message: "Project Deleted." })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete project" })
+  }
+}

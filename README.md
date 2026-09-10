@@ -2,16 +2,17 @@
 
 ## API Routes
 
-| Method | Endpoint                        | Description                  |
-| ------ | ------------------------------- | ---------------------------- |
-| `GET`  | `/api/auth/google`              | Sign in with Google          |
-| `GET`  | `/api/auth/github`              | Sign in with GitHub          |
-| `GET`  | `/api/auth/me`                  | Fetch user                   |
-| `PUT`  | `/api/profile`                  | Update profile               |
-| `POST` | `/api/projects`                 | Create new project           |
-| `GET`  | `/api/projects/{slug}`          | Get a project                |
-| `GET`  | `/api/projects/user/{username}` | Get all projects from a user |
-| `PUT`  | `/api/projects/{id}`            | Update project               | 
+| Method   | Endpoint                        | Description                  |
+| -------- | ------------------------------- | ---------------------------- |
+| `GET`    | `/api/auth/google`              | Sign in with Google          |
+| `GET`    | `/api/auth/github`              | Sign in with GitHub          |
+| `GET`    | `/api/auth/me`                  | Fetch user                   |
+| `PUT`    | `/api/profile`                  | Update profile               |
+| `POST`   | `/api/projects`                 | Create new project           |
+| `GET`    | `/api/projects/{slug}`          | Get a project                |
+| `GET`    | `/api/projects/user/{username}` | Get all projects from a user |
+| `PUT`    | `/api/projects/{id}`            | Update project               | 
+| `DELETE` | `/api/projects/{id}`            | Delete project               |
 
 ---
 
