@@ -13,9 +13,9 @@ export const issueCallbackToken = (req: Request, res: Response) => {
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     })
 
-    res.redirect(`${process.env.CLIENT_URL}`)
+    res.redirect(`${process.env.CLIENT_URL}/home`)
   } catch (error) {
-    res.redirect(`${process.env.CLIENT_URL}`)
+    res.redirect(`${process.env.CLIENT_URL}/signin?error=${error}`)
   }
 }
 

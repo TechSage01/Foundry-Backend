@@ -11,14 +11,14 @@ router.get("/me", authMiddleware, getMe)
 
 router.get("/google/callback", 
   passport.authenticate('google', {
-    failureRedirect: `${process.env.CLIENT_URL}`,
+    failureRedirect: `${process.env.CLIENT_URL}/signin?error="Authentication Failed"`,
     session: false
   }),
   issueCallbackToken
 );
 router.get("/github/callback", 
   passport.authenticate('github', {
-    failureRedirect: `${process.env.CLIENT_URL}`,
+    failureRedirect: `${process.env.CLIENT_URL}/signin?error="Authentication Failed"`,
     session: false
   }),
   issueCallbackToken
