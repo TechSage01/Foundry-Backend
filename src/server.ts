@@ -8,6 +8,7 @@ import appRouter from "./routes/app.js";
 import authRouter from "./routes/auth.js"
 import profileRouter from "./routes/profile.js"
 import projectRouter from "./routes/projects.js"
+import experienceRouter from "./routes/experience.js"
 import pool from "./config/db.js";
 import logger from "./middlewares/logger.js";
 
@@ -39,6 +40,7 @@ app.use("/", appRouter)
 app.use("/api/auth", authRouter)
 app.use("/api/profile", profileRouter)
 app.use("/api/projects", projectRouter)
+app.use("/api/experiences", experienceRouter)
 
 const PORT = process.env.PORT || 5000;
 

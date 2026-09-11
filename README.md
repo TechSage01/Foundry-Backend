@@ -2,18 +2,19 @@
 
 ## API Routes
 
-| Method   | Endpoint                        | Description                  |
-| -------- | ------------------------------- | ---------------------------- |
-| `GET`    | `/api/auth/google`              | Sign in with Google          |
-| `GET`    | `/api/auth/github`              | Sign in with GitHub          |
-| `GET`    | `/api/auth/me`                  | Fetch user                   |
-| `PUT`    | `/api/profile`                  | Update profile               |
-| `POST`   | `/api/projects`                 | Create new project           |
-| `GET`    | `/api/projects`                 | Fetch all published projects |
-| `GET`    | `/api/projects/{slug}`          | Get a project                |
-| `GET`    | `/api/projects/user/{username}` | Get all projects from a user |
-| `PUT`    | `/api/projects/{id}`            | Update project               | 
-| `DELETE` | `/api/projects/{id}`            | Delete project               |
+| Method   | Endpoint                        | Description                   |
+| -------- | ------------------------------- | ----------------------------- |
+| `GET`    | `/api/auth/google`              | Sign in with Google           |
+| `GET`    | `/api/auth/github`              | Sign in with GitHub           |
+| `GET`    | `/api/auth/me`                  | Fetch user                    |
+| `PUT`    | `/api/profile`                  | Update profile                |
+| `POST`   | `/api/projects`                 | Create new project            |
+| `GET`    | `/api/projects`                 | Fetch all published projects  |
+| `GET`    | `/api/projects/{slug}`          | Get a project                 |
+| `GET`    | `/api/projects/user/{username}` | Get all projects from a user  |
+| `PUT`    | `/api/projects/{id}`            | Update project                | 
+| `DELETE` | `/api/projects/{id}`            | Delete project                |
+| `POST`   | `/api/experiences`              | Create new experience/journey |
 
 ---
 
@@ -102,4 +103,27 @@ Update an existing project for the authenticated user.
 }
 ```
 
+<br>
+
 ---
+
+**`POST /api/experiences/`**
+
+Create a new experience/journey for the authenticated user.
+
+**Request Body**
+
+```json
+{
+  "company_name": "string",
+  "company_url": "string | null",
+  "role": "string",
+  "location": "string | null",
+  "employment_type": "Full-time | Part-time | Contract | Internship | Freelance | null",
+  "start_date": "Date",
+  "end_date": "Date | null",
+  "is_current": "boolean",
+  "description": "string | null",
+  "technologies": "string[] <an array of strings>"
+}
+```
