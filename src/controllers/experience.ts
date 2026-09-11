@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { createExperienceSchema } from "../schemas/experience.js";
 import pool from "../config/db.js";
+import { v4 as uuidv4 } from "uuid";
 
 // @route POST /api/experiences
 // @desc Create new experience
@@ -27,13 +28,16 @@ export const createExperience = async (req: Request, res: Response) => {
       technologies,
     } = validation.data;
 
+    const id = uuidv4();
+
     const { rows } = await pool.query(
       `INSERT INTO experiences (
-        user_id, company_name, company_url, role, location, employment_type,
+        id, user_id, company_name, company_url, role, location, employment_type,
         start_date, end_date, is_current, description, technologies
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
       RETURNING *`,
       [
+        id,
         userId,
         company_name,
         company_url ?? null,
@@ -50,6 +54,6 @@ export const createExperience = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "Experience added successfully", data: rows[0] })
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to add experience" })
+    return res.status(500).json({ success: false, message: "Failed to add experience: ", error })
   }
 }

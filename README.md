@@ -1,20 +1,41 @@
 # Foundry Backend
 
 ## API Routes
+### auth
 
 | Method   | Endpoint                        | Description                   |
 | -------- | ------------------------------- | ----------------------------- |
 | `GET`    | `/api/auth/google`              | Sign in with Google           |
 | `GET`    | `/api/auth/github`              | Sign in with GitHub           |
 | `GET`    | `/api/auth/me`                  | Fetch user                    |
+
+
+### profile
+
+| Method   | Endpoint                        | Description                   |
+| -------- | ------------------------------- | ----------------------------- |
 | `PUT`    | `/api/profile`                  | Update profile                |
+
+
+### projects
+
+| Method   | Endpoint                        | Description                   |
+| -------- | ------------------------------- | ----------------------------- |
 | `POST`   | `/api/projects`                 | Create new project            |
 | `GET`    | `/api/projects`                 | Fetch all published projects  |
 | `GET`    | `/api/projects/{slug}`          | Get a project                 |
 | `GET`    | `/api/projects/user/{username}` | Get all projects from a user  |
 | `PUT`    | `/api/projects/{id}`            | Update project                | 
 | `DELETE` | `/api/projects/{id}`            | Delete project                |
+
+
+### experiences
+
+| Method   | Endpoint                        | Description                   |
+| -------- | ------------------------------- | ----------------------------- |
 | `POST`   | `/api/experiences`              | Create new experience/journey |
+
+<br>
 
 ---
 

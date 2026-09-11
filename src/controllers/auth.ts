@@ -9,7 +9,7 @@ export const issueCallbackToken = (req: Request, res: Response) => {
     res.cookie("foundry_token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "none",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     })
 
