@@ -47,21 +47,19 @@
 
 Updates the authenticated user's profile.
 
-**Request Body**
+**Request Body (`multipart/form-data`)**
 
-```json
-{
-  "username": "string",
-  "headline": "string | null",
-  "bio": "string | null",
-  "location": "string | null",
-  "skills": ["string"],
-  "external_links": {
-    "github": "https://github.com/username",
-    "linkedin": "https://linkedin.com/in/username"
-  }
-}
-```
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `avatar`         | File          | No       | Profile avatar. Maximum size: 3MB.                 |
+| `username`       | string        | No       | User's username.                                   |
+| `full_name`      | string        | No       | User's full name.                                  |
+| `headline`       | string | null | No       | User's profile headline.                           |
+| `bio`            | string | null | No       | User's biography.                                  |
+| `location`       | string | null | No       | User's location.                                   |
+| `skills`         | string        | No       | JSON-stringified array of skills.                  |
+| `external_links` | string        | No       | JSON-stringified object containing external links. |
+
 <br>
 
 ---
