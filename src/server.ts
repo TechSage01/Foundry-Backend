@@ -11,11 +11,13 @@ import projectRouter from "./routes/projects.js"
 import experienceRouter from "./routes/experience.js"
 import pool from "./config/db.js";
 import logger from "./middlewares/logger.js";
+import { globalLimiter, uploadLimiter } from "./middlewares/limiter.js";
 
 dotenv.config();
 const app = express();
 
 // middlewares
+app.set("trust proxy", 1)
 app.use((req, res, next) => {
   cors({
     origin: [process.env.CLIENT_URL!],
@@ -36,9 +38,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // routes
-app.use("/", appRouter)
+app.use("/", globalLimiter, appRouter)
 app.use("/api/auth", authRouter)
-app.use("/api/profile", profileRouter)
+app.use("/api/profile", uploadLimiter, profileRouter)
 app.use("/api/projects", projectRouter)
 app.use("/api/experiences", experienceRouter)
 
