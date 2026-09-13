@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { createProjectSchema, updateProjectSchema } from "../schemas/project.js";
 import { slugify } from "../utils/helpers.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 import { Project } from "../types/projects.js";
 import { uploadFile } from "../config/imagekit.js";
@@ -198,40 +198,68 @@ export const updateProject = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.id;
 
-  if (id === "") {
-    return res.status(400).json({ success: false, message: "Id Missing" })
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Id" })
   }
 
-  const validation = updateProjectSchema.safeParse(req.body);
+  const payload = {...req.body}
+
+  if (typeof payload.tech_stack === "string") {
+    try {
+      payload.tech_stack = JSON.parse(payload.tech_stack);
+    } catch {
+      payload.tech_stack = payload.tech_stack.split(",").map((s: string) => s.trim()).filter(Boolean);
+    }
+  }
+
+  if (typeof payload.is_published === "string") {
+    payload.is_published = payload.is_published === "true";
+  }
+
+  const validation = updateProjectSchema.safeParse(payload);
   if (!validation.success) {
     return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
   }
 
-  if (!validation.data || Object.keys(validation.data).length === 0) {
+  const hasBodyFields = validation.data && Object.keys(validation.data).length > 0;
+  if (!hasBodyFields && !req.file) {
     return res.status(400).json({
       success: false,
       message: "At least one field must be provided to update",
     });
   }
 
-  const { title, tagline, description, cover_image_url, demo_url, github_url, tech_stack, is_published } = validation.data;
+  const { title, tagline, description, demo_url, github_url, tech_stack, is_published } = validation.data;
 
   try {
+    let coverImageUrl: string | null = validation.data.cover_image_url ?? null;
+    if (req.file) {
+      coverImageUrl = await uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype
+      );
+    }
+
+    // Regenerate slug if a new title was provided
+    const newSlug = title ? slugify(title) : null;
+
     const { rows } = await pool.query(
       `UPDATE projects
        SET
          title = COALESCE($1, title),
-         tagline = COALESCE($2, tagline),
-         description = COALESCE($3, description),
-         cover_image_url = COALESCE($4, cover_image_url),
-         demo_url = COALESCE($5, demo_url),
-         github_url = COALESCE($6, github_url),
-         tech_stack = COALESCE($7, tech_stack),
-         is_published = COALESCE($8, is_published),
+         slug = COALESCE($2, slug),
+         tagline = COALESCE($3, tagline),
+         description = COALESCE($4, description),
+         cover_image_url = COALESCE($5, cover_image_url),
+         demo_url = COALESCE($6, demo_url),
+         github_url = COALESCE($7, github_url),
+         tech_stack = COALESCE($8, tech_stack),
+         is_published = COALESCE($9, is_published),
          updated_at = NOW()
-       WHERE id = $9 AND user_id = $10
+       WHERE id = $10 AND user_id = $11
        RETURNING *`,
-      [title, tagline, description, cover_image_url, demo_url, github_url, tech_stack, is_published, id, userId]
+      [title, newSlug, tagline, description, coverImageUrl, demo_url, github_url, tech_stack, is_published, id, userId]
     );
 
     if (!rows[0]) {
@@ -251,8 +279,8 @@ export const deleteProject = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.id;
 
-  if (!id) {
-    return res.status(400).json({ success: false, message: "Project ID is required" })
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Project Id" })
   }
 
   try {
