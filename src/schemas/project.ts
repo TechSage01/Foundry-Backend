@@ -5,8 +5,8 @@ export const createProjectSchema = z.object({
   tagline: z.string().min(5, "Tagline must be at least 5 chars").max(200, "Tagline max 200 chars"),
   description: z.string().optional().nullable(),
   cover_image_url: z.string().url("Must be a valid url").optional().nullable(),
-  demo_url: z.string().url("Must be a valid url").optional().nullable(),
-  github_url: z.string().url("Must be a valid url").optional().nullable(),
+  demo_url: z.string().url("Must be a valid url").or(z.literal("")).optional().nullable(),
+  github_url: z.string().url("Must be a valid url").or(z.literal("")).optional().nullable(),
   tech_stack: z.array(z.string()).default([]),
   is_published: z.boolean().default(true),
 });
