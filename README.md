@@ -68,20 +68,19 @@ Updates the authenticated user's profile.
 
 Creates a new project for the authenticated user.
 
-**Request Body**
+**Request Body (`multipart/form-data`)**
 
-```json
-{
-  "title": "string",
-  "tagline": "string",
-  "description": "string | null",
-  "cover_image_url": "string | null",
-  "demo_url": "string | null",
-  "github_url": "string | null",
-  "tech_stack": ["string"],
-  "is_published": "boolean <false for draft>"
-}
-```
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `title`          | string        | Yes      | Project's title                                    |
+| `tagline`        | string        | Yes      | Project's tagline.                                 |
+| `description`    | string        | No       | Project's description.                             |
+| `cover_image`    | File          | No       | Project's display image.                           |
+| `demo_url`       | string        | No       | A demo video url.                                  |
+| `github_url`     | string        | No       | The project's github link.                         |
+| `tech_stack`     | string        | Yes      | JSON-stringified array of tech stacks.             |
+| `is_published`   | string        | Yes      | "true" or "false" <"false" for drafts>.            |
+
 <br>
 
 ---
@@ -107,20 +106,18 @@ Fetches a paginated list of published projects with optional technology tag filt
 
 Update an existing project for the authenticated user.
 
-**Request Body**
+**Request Body (`multipart/form-data`)**
 
-```json
-{
-  "title": "string",
-  "tagline": "string",
-  "description": "string | null",
-  "cover_image_url": "string | null",
-  "demo_url": "string | null",
-  "github_url": "string | null",
-  "tech_stack": ["string"],
-  "is_published": "boolean <false for draft>"
-}
-```
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `title`          | string        | No       | Project's title                                    |
+| `tagline`        | string        | No       | Project's tagline.                                 |
+| `description`    | string        | No       | Project's description.                             |
+| `cover_image`    | File          | No       | Project's display image.                           |
+| `demo_url`       | string        | No       | A demo video url.                                  |
+| `github_url`     | string        | No       | The project's github link.                         |
+| `tech_stack`     | string        | No       | JSON-stringified array of tech stacks.             |
+| `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
 
 <br>
 
