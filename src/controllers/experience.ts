@@ -100,7 +100,7 @@ export const getExperiencesByUsername = async (req: Request, res: Response) => {
 
 // @route PUT /api/experiences/:id
 // @desc Update an existing experience
-// @access Authenticated user
+// @access Authenticated users
 export const updateExperience = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.id;
@@ -178,5 +178,39 @@ export const updateExperience = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, message: "Experience Updated" })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to update experience" })
+  }
+}
+
+// @route DELETE /api/experiences/:id
+// @desc Delete an experience
+// @access Authenticated users
+export const deleteExperience = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Id" })
+  }
+
+  try {
+    const { rowCount } = await pool.query(
+      `DELETE FROM experiences WHERE id = $1 AND user_id = $2`
+    , [id, userId])
+
+    if (rowCount === 0) {
+      const check = await pool.query(
+        `SELECT user_id FROM experiences WHERE id = $1`
+      , [id])
+
+      if (check.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Not Found" })
+      }
+
+      return res.status(403).json({ success: false, message: "Access Denied" })
+    }
+
+    return res.status(200).json({ success: true, message: "Experience Deleted" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete experience" })
   }
 }

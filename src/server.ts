@@ -52,7 +52,7 @@ const startServer = async () => {
     await client.query('SELECT NOW()');
     client.release();
 
-    console.log("Connected to PostgreSQL")
+    console.log("Connected to Database")
 
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`)
