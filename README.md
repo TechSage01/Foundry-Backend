@@ -36,6 +36,7 @@
 | `POST`   | `/api/experiences`                 | Create new experience/journey                    |
 | `GET`    | `/api/experiences/user/{username}` | Fetch all experiences associated with a username |
 | `PUT`    | `/api/experiences/{id}`            | Update experience                                |
+| `DELETE` | `/api/experiences/{id}`            | Delete experience                                |
 
 <br>
 
