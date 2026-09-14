@@ -59,7 +59,7 @@ export const createExperience = async (req: Request, res: Response) => {
 }
 
 // @route GET /api/experiences/user/:username
-// @desc Fetch all experiences associated with a profile's username
+// @desc Fetch all experiences associated with a username
 // @access Public
 export const getExperiencesByUsername = async (req: Request, res: Response) => {
   const { username } = req.params as { username: string };

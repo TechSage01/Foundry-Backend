@@ -31,9 +31,11 @@
 
 ### experiences
 
-| Method   | Endpoint                        | Description                   |
-| -------- | ------------------------------- | ----------------------------- |
-| `POST`   | `/api/experiences`              | Create new experience/journey |
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/experiences`                 | Create new experience/journey                    |
+| `GET`    | `/api/experiences/user/{username}` | Fetch all experiences associated with a username |
+| `PUT`    | `/api/experiences/{id}`            | Update experience                                |
 
 <br>
 
@@ -143,3 +145,30 @@ Create a new experience/journey for the authenticated user.
   "technologies": "string[] <an array of strings>"
 }
 ```
+
+<br>
+
+---
+
+**`PUT /api/experiences/{id}`**
+
+Update an experience/journey.
+
+**Request Body**
+
+```json
+{
+  "company_name": "string | null",
+  "company_url": "string | null",
+  "role": "string | null",
+  "location": "string | null",
+  "employment_type": "Full-time | Part-time | Contract | Internship | Freelance | null",
+  "start_date": "Date | null",
+  "end_date": "Date | null",
+  "is_current": "boolean | null",
+  "description": "string | null",
+  "technologies": "string[] <an array of strings> | null"
+}
+```
+
+
