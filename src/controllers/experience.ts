@@ -57,3 +57,43 @@ export const createExperience = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to add experience: ", error })
   }
 }
+
+// @route GET /api/experiences/user/:username
+// @desc Fetch all experiences associated with a profile's username
+// @access Public
+export const getExperiencesByUsername = async (req: Request, res: Response) => {
+  const { username } = req.params as { username: string };
+
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Username is required" })
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+          e.id,
+          e.company_name,
+          e.role,
+          e.location,
+          e.employment_type,
+          e.start_date,
+          e.end_date,
+          e.is_current,
+          e.description,
+          e.technologies,
+          e.created_at
+        FROM experiences e
+        JOIN profiles p ON e.user_id = p.user_id
+        WHERE LOWER(p.username) = LOWER($1)
+        ORDER BY e.is_current DESC, e.start_date DESC
+    `, [username.trim()])
+
+    if (rows.length < 1) {
+      return res.status(404).json({ success: false, message: "Not Found" })
+    }
+
+    return res.status(200).json({ success: true, data: rows[0] })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch experiences" })
+  }
+}
