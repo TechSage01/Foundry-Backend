@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { createExperienceSchema } from "../schemas/experience.js";
+import { createExperienceSchema, updateExperienceSchema } from "../schemas/experience.js";
 import pool from "../config/db.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as isUuid } from "uuid";
 
 // @route POST /api/experiences
 // @desc Create new experience
@@ -95,5 +95,88 @@ export const getExperiencesByUsername = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, data: rows[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch experiences" })
+  }
+}
+
+// @route PUT /api/experiences/:id
+// @desc Update an existing experience
+// @access Authenticated user
+export const updateExperience = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Id" })
+  }
+
+  const validation = updateExperienceSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+  }
+
+  const {
+    company_name,
+    role,
+    location,
+    employment_type,
+    start_date,
+    end_date,
+    is_current,
+    description,
+    technologies,
+  } = validation.data;
+
+  try {
+    const { rows } = await pool.query(
+    `UPDATE experiences
+      SET
+        company_name = COALESCE($1, company_name),
+        role = COALESCE($2, role),
+        location = COALESCE($3, location),
+        employment_type = COALESCE($4, employment_type),
+        start_date = COALESCE($5, start_date),
+        end_date = COALESCE($6, end_date),
+        is_current = COALESCE($7, is_current),
+        description = COALESCE($8, description),
+        technologies = COALESCE($9::text[], technologies),
+        updated_at = NOW()
+      WHERE id = $10 AND user_id = $11
+      RETURNING *`,
+    [
+      company_name ?? null,
+      role ?? null,
+      location ?? null,
+      employment_type ?? null,
+      start_date ?? null,
+      is_current ? null : (end_date ?? null),
+      is_current ?? null,
+      description ?? null,
+      technologies ?? null,
+      id,
+      userId,
+    ])
+
+    if (!rows[0]) {
+      const existingRecord = await pool.query(
+        `SELECT user_id FROM experiences WHERE id = $1`,
+        [id]
+      );
+
+      if (existingRecord.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Experience Not Found",
+        });
+      }
+
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied",
+      });
+    }
+
+    return res.status(200).json({ success: true, message: "Experience Updated" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update experience" })
   }
 }
