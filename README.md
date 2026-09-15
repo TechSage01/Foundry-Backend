@@ -38,6 +38,13 @@
 | `PUT`    | `/api/experiences/{id}`            | Update experience                                |
 | `DELETE` | `/api/experiences/{id}`            | Delete experience                                |
 
+
+### posts
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/posts`                       | Create new posts                                 |
+
 <br>
 
 ---
@@ -171,5 +178,26 @@ Update an experience/journey.
   "technologies": "string[] <an array of strings> | null"
 }
 ```
+
+<br>
+
+---
+
+**`POST /api/posts`**
+
+Creates a new post for the authenticated user.
+
+**Request Body (`multipart/form-data`)**
+
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `title`          | string        | Yes      | Post's title                                       |
+| `subtitle`       | string        | No       | Post's subtitle/tagline.                           |
+| `content`        | string        | Yes      | Post's content.                                    |
+| `cover_image`    | File          | No       | Post's display image.                              |
+| `tags`           | string        | No       | Post hash tags.                                    |
+| `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
+
+<br>
 
 
