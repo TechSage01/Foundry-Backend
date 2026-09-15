@@ -9,6 +9,7 @@ import authRouter from "./routes/auth.js"
 import profileRouter from "./routes/profile.js"
 import projectRouter from "./routes/projects.js"
 import experienceRouter from "./routes/experience.js"
+import postRouter from "./routes/posts.js"
 import pool from "./config/db.js";
 import logger from "./middlewares/logger.js";
 import { globalLimiter, uploadLimiter } from "./middlewares/limiter.js";
@@ -43,6 +44,7 @@ app.use("/api/auth", authRouter)
 app.use("/api/profile", uploadLimiter, profileRouter)
 app.use("/api/projects", projectRouter)
 app.use("/api/experiences", experienceRouter)
+app.use("/api/posts", postRouter)
 
 const PORT = process.env.PORT || 5000;
 
