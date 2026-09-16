@@ -1,0 +1,1 @@
+secure projects and author ID on GET endpoints

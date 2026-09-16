@@ -63,7 +63,7 @@ export const createProject = async (req: Request, res: Response) => {
 }
 
 // @route GET /api/projects
-// @desc Fetch projects
+// @desc Fetch all published projects
 // @access Public
 export const fetchProjects = async (req: Request, res: Response) => {
   const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
