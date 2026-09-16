@@ -44,14 +44,14 @@
 | Method   | Endpoint                           | Description                                      |
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/posts`                       | Create new posts                                 |
+| `GET`    | `/api/posts`                       | Fetch all published posts                        |
+| `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 
-<br>
-
----
+<br><br>
 
 ## Docs
 
----
+<br>
 
 **`PUT /api/profile`**
 
