@@ -166,26 +166,39 @@ export const getProject = async (req: Request, res: Response) => {
 // @desc Get all projects from a user
 // @access Public
 export const getUserProjects = async (req: Request, res: Response) => {
-  const { username } = req.params;
+  const { username } = req.params as { username: string};
 
-  if (username === "") {
+  if (!username || username.trim() === "") {
     return res.status(400).json({ success: false, message: "Invalid Username" })
   }
 
   try {
-    const { rows } = await pool.query(`
-      SELECT p.*
-      FROM projects p
-      JOIN profiles prof ON p.user_id = prof.user_id
-      WHERE LOWER(username) = LOWER($1) AND is_published = true
-      ORDER BY p.created_at DESC
-    `, [username])
+    const { rows } = await pool.query(
+      `SELECT 
+         p.id,
+         p.title,
+         p.slug,
+         p.tagline,
+         p.description,
+         p.cover_image_url,
+         p.demo_url,
+         p.github_url,
+         p.tech_stack,
+         p.is_published,
+         p.created_at,
+         p.updated_at
+       FROM projects p
+       JOIN profiles prof ON p.user_id = prof.user_id
+       WHERE LOWER(prof.username) = LOWER($1) AND p.is_published = true
+       ORDER BY p.created_at DESC`,
+      [username.trim()]
+    );
 
     if (rows.length < 1) {
-      return res.status(404).json({ success: false, message: "Projects Not Found" })
+      return res.status(404).json({ success: false, message: "Projects Not Found" });
     }
 
-    return res.status(200).json({ success: true, message: "", data: rows })
+    return res.status(200).json({ success: true, message: "", data: rows });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch Projects" })
   }
