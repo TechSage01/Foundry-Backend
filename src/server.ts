@@ -10,6 +10,7 @@ import profileRouter from "./routes/profile.js"
 import projectRouter from "./routes/projects.js"
 import experienceRouter from "./routes/experience.js"
 import postRouter from "./routes/posts.js"
+import userRouter from "./routes/user.js"
 import pool from "./config/db.js";
 import logger from "./middlewares/logger.js";
 import { globalLimiter, uploadLimiter } from "./middlewares/limiter.js";
@@ -38,6 +39,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+
 // routes
 app.use("/", globalLimiter, appRouter)
 app.use("/api/auth", authRouter)
@@ -45,6 +47,8 @@ app.use("/api/profile", uploadLimiter, profileRouter)
 app.use("/api/projects", projectRouter)
 app.use("/api/experiences", experienceRouter)
 app.use("/api/posts", postRouter)
+app.use("/api/users", userRouter)
+
 
 const PORT = process.env.PORT || 5000;
 
