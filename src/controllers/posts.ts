@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { createPostSchema } from "../schemas/post.js";
+import { createPostSchema, updatePostSchema } from "../schemas/post.js";
 import { uploadFile } from "../config/imagekit.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as isUuid } from "uuid";
 import { calculateReadingTime, slugify } from "../utils/helpers.js";
 import pool from "../config/db.js";
+import { deflate } from "node:zlib";
 
 // @route POST /api/posts
 // @desc create a new posts
@@ -149,5 +150,121 @@ export const getPost = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, data: rows[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get post" })
+  }
+}
+
+// @route PUT /api/posts/:id
+// @desc update a post
+// @access Authenticated users
+export const updatePost = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Post Id" })
+  }
+
+  const payload = { ...req.body };
+
+  if (typeof payload.tags === "string") {
+    try {
+      payload.tags = JSON.parse(payload.tags);
+    } catch {
+      payload.tags = payload.tags.split(",").map((t: string) => t.trim()).filter(Boolean);
+    }
+  }
+
+  if (typeof payload.is_published === "string") {
+    payload.is_published = payload.is_published === "true";
+  }
+
+  const validation = updatePostSchema.safeParse(payload)
+  const hasBodyFields = validation.success && Object.keys(validation.data).length > 0;
+
+  if (!hasBodyFields && !req.file) {
+    return res.status(400).json({
+      success: false,
+      message: "At least one field or image must be provided to update",
+    });
+  };
+
+  if (!validation.success) {
+    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors})
+  }
+
+  const { title, subtitle, content, tags, is_published } = validation.data;
+
+  try {
+    const check = await pool.query(
+      `SELECT user_id, created_at FROM posts WHERE id = $1`,
+      [id]
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post not found" });
+    }
+
+    if (check.rows[0].user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied",
+      });
+    }
+
+    // enforce 10 minutes window for posts update
+    const TEN_MINUTES_MS = 10 * 60 * 1000;
+    const createdAtMs = new Date(check.rows[0].created_at).getTime();
+
+    if (Date.now() - createdAtMs > TEN_MINUTES_MS) {
+      return res.status(403).json({
+        success: false,
+        message: "Forbidden: Posts can only be edited within 10 minutes of creation",
+      });
+    }
+
+    let coverImageUrl: string | null = validation.data.cover_image_url ?? null;
+
+    if (req.file) {
+      coverImageUrl = await uploadFile(
+        req.file.buffer,
+        req.file.originalname,
+        req.file.mimetype
+      );
+    }
+
+    const newSlug = title ? slugify(title) : null;
+    const readingTime = content ? calculateReadingTime(content) : null;
+
+    const { rows } = await pool.query(
+      `UPDATE posts
+       SET
+         title = COALESCE($1, title),
+         slug = COALESCE($2, slug),
+         subtitle = COALESCE($3, subtitle),
+         content = COALESCE($4, content),
+         cover_image_url = COALESCE($5, cover_image_url),
+         tags = COALESCE($6::text[], tags),
+         is_published = COALESCE($7, is_published),
+         reading_time_minutes = COALESCE($8, reading_time_minutes),
+         updated_at = NOW()
+       WHERE id = $9 AND user_id = $10 AND created_at >= NOW() - INTERVAL '10 minutes'
+       RETURNING *`,
+      [
+        title ?? null,
+        newSlug,
+        subtitle ?? null,
+        content ?? null,
+        coverImageUrl,
+        tags ?? null,
+        is_published ?? null,
+        readingTime,
+        id,
+        userId,
+      ]
+    );
+
+    return res.status(200).json({ success: true, message: "Post Updated", data: rows[0] })
+  } catch (error) { 
+    return res.status(500).json({ success: false, message: "Failed to update post", error })
   }
 }

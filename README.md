@@ -46,6 +46,7 @@
 | `POST`   | `/api/posts`                       | Create new posts                                 |
 | `GET`    | `/api/posts`                       | Fetch all published posts                        |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
+| `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
 
 <br><br>
 
@@ -194,6 +195,27 @@ Creates a new post for the authenticated user.
 | `title`          | string        | Yes      | Post's title                                       |
 | `subtitle`       | string        | No       | Post's subtitle/tagline.                           |
 | `content`        | string        | Yes      | Post's content.                                    |
+| `cover_image`    | File          | No       | Post's display image.                              |
+| `tags`           | string        | No       | Post hash tags.                                    |
+| `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
+
+<br>
+
+---
+
+<br>
+
+**`PUT /api/posts/:id`**
+
+Updates a post for the authenticated user.
+
+**Request Body (`multipart/form-data`)**
+
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `title`          | string        | No       | Post's title                                       |
+| `subtitle`       | string        | No       | Post's subtitle/tagline.                           |
+| `content`        | string        | No       | Post's content.                                    |
 | `cover_image`    | File          | No       | Post's display image.                              |
 | `tags`           | string        | No       | Post hash tags.                                    |
 | `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
