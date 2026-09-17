@@ -140,23 +140,7 @@ export const getProject = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Project Not Found." })
     }
 
-    const project: Project = rows[0]
-    const data = {
-      id: project.id,
-      title: project.title,
-      slug: project.slug,
-      tagline: project.tagline,
-      description: project.description,
-      cover_image_url: project.cover_image_url,
-      demo_url: project.demo_url,
-      github_url: project.github_url,
-      tech_stack: project.tech_stack,
-      is_published: project.is_published,
-      views_count: project.views_count,
-      created_at: project.created_at
-    }
-
-    return res.status(200).json({ success: true, message: "", data })
+    return res.status(200).json({ success: true, message: "", data: rows[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch projects details" })
   }
