@@ -48,6 +48,16 @@
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
 
+
+### follows
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/users/{userId}/follow`       | Follow a user                                    |
+| `DELETE` | `/api/users/{userId}/follow`       | UnFollow a user                                  |
+| `GET`    | `/api/users/{username}/followers`  | Get a list of followers for a user               |
+| `GET`    | `/api/users/{username}/following`  | Get a list of users the user is following        |
+
 <br><br>
 
 ## Docs
