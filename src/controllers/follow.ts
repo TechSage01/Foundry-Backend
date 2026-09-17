@@ -66,3 +66,58 @@ export const unFollowUser = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to unfollow user" });
   }
 }
+
+// @route GET /api/users/:username/followers
+// @desc  Get list of followers for a user
+// @access Public
+export const getFollowers = async (req: Request, res: Response) => {
+  const { username } = req.params as { username: string };
+
+  if (!username || username.trim() === "") {
+    return res.status(400).json({ success: false, message: "Username is required" });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
+       FROM follows f
+       JOIN profiles prof ON f.follower_id = prof.user_id
+       JOIN profiles target_prof ON f.following_id = target_prof.user_id
+       WHERE LOWER(target_prof.username) = LOWER($1)
+       ORDER BY f.created_at DESC`,
+      [username.trim()]
+    );
+
+    return res.status(200).json({ success: true, count: rows.length, data: rows });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch followers" });
+  }
+};
+
+// @route   GET /api/users/:username/following
+// @desc    Get list of users a user is following
+// @access  Public
+export const getFollowing = async (req: Request, res: Response) => {
+  const { username } = req.params as { username: string };
+
+  if (!username || username.trim() === "") {
+    return res.status(400).json({ success: false, message: "Username is required" });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
+       FROM follows f
+       JOIN profiles prof ON f.following_id = prof.user_id
+       JOIN profiles target_prof ON f.follower_id = target_prof.user_id
+       WHERE LOWER(target_prof.username) = LOWER($1)
+       ORDER BY f.created_at DESC`,
+      [username.trim()]
+    );
+
+    return res.status(200).json({ success: true, count: rows.length, data: rows });
+  } catch (error) {
+    console.error("Error fetching following:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch following" });
+  }
+};
