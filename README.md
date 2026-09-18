@@ -27,6 +27,7 @@
 | `GET`    | `/api/projects/user/{username}` | Get all projects from a user  |
 | `PUT`    | `/api/projects/{id}`            | Update project                | 
 | `DELETE` | `/api/projects/{id}`            | Delete project                |
+| `POST`   | `/api/projects/{id}/phases`     | Create a phase for a project  |
 
 
 ### experiences
@@ -139,6 +140,24 @@ Update an existing project for the authenticated user.
 | `github_url`     | string        | No       | The project's github link.                         |
 | `tech_stack`     | string        | No       | JSON-stringified array of tech stacks.             |
 | `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
+
+<br>
+
+---
+
+**`POST /api/projects/{id}/phases`**
+
+Create a project phase for the authenticated user.
+
+**Request Body**
+
+```json
+{
+  "title": "string",
+  "description": "string | null",
+  "is_completed": "string | null",
+}
+```
 
 <br>
 
