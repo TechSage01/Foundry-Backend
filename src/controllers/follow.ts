@@ -80,11 +80,11 @@ export const getFollowers = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
-       FROM follows f
-       JOIN profiles prof ON f.follower_id = prof.user_id
+       FROM profiles prof
+       JOIN follows f ON f.follower_id = prof.user_id
        JOIN profiles target_prof ON f.following_id = target_prof.user_id
        WHERE LOWER(target_prof.username) = LOWER($1)
-       ORDER BY f.created_at DESC`,
+       ORDER BY prof.created_at DESC`,
       [username.trim()]
     );
 
@@ -107,11 +107,11 @@ export const getFollowing = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(
       `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
-       FROM follows f
-       JOIN profiles prof ON f.following_id = prof.user_id
+       FROM profiles prof
+       JOIN follows f ON f.following_id = prof.user_id
        JOIN profiles target_prof ON f.follower_id = target_prof.user_id
        WHERE LOWER(target_prof.username) = LOWER($1)
-       ORDER BY f.created_at DESC`,
+       ORDER BY prof.created_at DESC`,
       [username.trim()]
     );
 
