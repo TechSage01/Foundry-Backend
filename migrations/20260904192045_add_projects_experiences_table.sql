@@ -39,6 +39,19 @@ CREATE TABLE IF NOT EXISTS experiences (
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS project_phases (
+  id UUID PRIMARY KEY,
+  project_id UUID NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  is_completed BOOLEAN DEFAULT false,
+  order_index INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
 CREATE TRIGGER trg_projects_updated_at
   BEFORE UPDATE ON projects
   FOR EACH ROW
@@ -57,4 +70,5 @@ DROP TRIGGER IF EXISTS trg_experiences_updated_at ON experiences;
 
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS experiences;
+DROP TABLE IF EXISTS project_phases;
 -- +goose StatementEnd

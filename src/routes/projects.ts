@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createProject, deleteProject, fetchProjects, getProject, getUserProjects, updateProject } from "../controllers/project.js";
+import { createProject, createProjectPhase, deleteProject, fetchProjects, getProject, getUserProjects, updateProject } from "../controllers/project.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 
@@ -15,5 +15,7 @@ router.get("/user/:username", getUserProjects)
 router.post("/", authMiddleware, uploadLimiter, upload.single("cover_image"), createProject)
 router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updateProject)
 router.delete("/:id", authMiddleware, deleteProject)
+
+router.post("/:id/phases", authMiddleware, createProjectPhase)
 
 export default router;

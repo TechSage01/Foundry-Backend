@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createProjectSchema, updateProjectSchema } from "../schemas/project.js";
+import { createPhaseSchema, createProjectSchema, updateProjectSchema } from "../schemas/project.js";
 import { slugify } from "../utils/helpers.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
@@ -292,5 +292,68 @@ export const deleteProject = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, message: "Project Deleted." })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to delete project" })
+  }
+}
+
+// @route POST /api/projects/{id}/phases
+// @desc Create a new project phase
+// @access Owner only
+export const createProjectPhase = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Project Id" })
+  }
+
+  const validation = createPhaseSchema.safeParse(req.body)
+  if (!validation.success) {
+    const { fieldErrors, formErrors } = validation.error.flatten();
+
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      details: {
+      ...fieldErrors,
+      ...(formErrors.length > 0 && { _form: formErrors }),
+    }})
+  }
+
+  try {
+    const projectCheck = await pool.query(
+      `SELECT user_id FROM projects WHERE id = $1`,
+      [id]
+    );
+
+    if (projectCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Project not found" });
+    }
+
+    if (projectCheck.rows[0].user_id !== userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Access Denied",
+      });
+    }
+
+    const { title, description, is_completed } = validation.data;
+    const phaseId = uuidv4();
+
+    const { rows } = await pool.query(`
+      INSERT INTO project_phases (id, project_id, title, description, is_completed, order_index)
+       VALUES (
+        $1, 
+        $2, 
+        $3, 
+        $4, 
+        $5, 
+        COALESCE((SELECT MAX(order_index) FROM project_phases WHERE project_id = $2), 0) + 1
+      )
+      RETURNING *
+    `, [phaseId, id, title, description ?? null, is_completed ])
+
+    return res.status(201).json({ success: true, message: "Phase Created", data: rows[0] })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to create phase" })
   }
 }

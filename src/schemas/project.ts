@@ -21,3 +21,18 @@ export const updateProjectSchema = z.object({
   tech_stack: z.array(z.string()).optional(),
   is_published: z.boolean().optional(),
 });
+
+export const createPhaseSchema = z.object({
+  title: z
+    .string()
+    .min(1, "Phase title is required")
+    .max(255, "Title cannot exceed 255 characters"),
+  description: z.string().max(2000, "Description cannot exceed 2000 characters").optional().nullable(),
+  is_completed: z.boolean().optional().default(false),
+});
+
+export const updatePhaseSchema = createPhaseSchema
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "At least one field must be provided to update",
+  });
