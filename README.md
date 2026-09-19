@@ -19,15 +19,16 @@
 
 ### projects
 
-| Method   | Endpoint                        | Description                   |
-| -------- | ------------------------------- | ----------------------------- |
-| `POST`   | `/api/projects`                 | Create new project            |
-| `GET`    | `/api/projects`                 | Fetch all published projects  |
-| `GET`    | `/api/projects/{slug}`          | Get a project                 |
-| `GET`    | `/api/projects/user/{username}` | Get all projects from a user  |
-| `PUT`    | `/api/projects/{id}`            | Update project                | 
-| `DELETE` | `/api/projects/{id}`            | Delete project                |
-| `POST`   | `/api/projects/{id}/phases`     | Create a phase for a project  |
+| Method   | Endpoint                           | Description                                   |
+| -------- | ---------------------------------- | --------------------------------------------- |
+| `POST`   | `/api/projects`                    | Create new project                            |
+| `GET`    | `/api/projects`                    | Fetch all published projects                  |
+| `GET`    | `/api/projects/{slug}`             | Get a project                                 |
+| `GET`    | `/api/projects/user/{username}`    | Get all projects from a user                  |
+| `PUT`    | `/api/projects/{id}`               | Update project                                | 
+| `DELETE` | `/api/projects/{id}`               | Delete project                                |
+| `POST`   | `/api/projects/{id}/phases`        | Create a phase for a project                  |
+| `PATCH`  | `/api/projects/phases/{id}/toggle` | Toggle completion status for a project phase  |
 
 
 ### experiences
