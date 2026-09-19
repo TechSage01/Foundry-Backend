@@ -366,7 +366,7 @@ export const toggleProjectPhase = async (req: Request, res: Response) => {
   const userId = req.user;
 
   if (!id || !isUuid(id)) {
-    return res.status(400).json({ success: false, message: "Invalid Project Id" })
+    return res.status(400).json({ success: false, message: "Invalid Project Phase Id" })
   }
 
   try {
@@ -412,9 +412,8 @@ export const toggleProjectPhase = async (req: Request, res: Response) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: true,
-      message: `Failed to toggle project phasws`
+      success: false,
+      message: `Failed to toggle project phases`
     });
   }
-
 }
