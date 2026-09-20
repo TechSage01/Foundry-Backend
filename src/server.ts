@@ -24,7 +24,7 @@ app.use((req, res, next) => {
   cors({
     origin: [process.env.CLIENT_URL!],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
   })(req, res, next)
 })

@@ -92,7 +92,7 @@ export const getExperiencesByUsername = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Not Found" })
     }
 
-    return res.status(200).json({ success: true, data: rows[0] })
+    return res.status(200).json({ success: true, data: rows })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch experiences" })
   }

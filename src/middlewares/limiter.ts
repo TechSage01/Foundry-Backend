@@ -7,7 +7,7 @@ export const globalLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     success: false,
-    message: 'Too many requests, please try again after 15 minutes.',
+    message: 'Too many requests, please try again after 10 minutes.',
   },
 });
 
