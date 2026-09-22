@@ -29,6 +29,7 @@
 | `DELETE` | `/api/projects/{id}`               | Delete project                                |
 | `POST`   | `/api/projects/{id}/phases`        | Create a phase for a project                  |
 | `PATCH`  | `/api/projects/phases/{id}/toggle` | Toggle completion status for a project phase  |
+| `DELETE` | `/api/projects/phases/{id}`        | Delete a project phase                        |
 
 
 ### experiences

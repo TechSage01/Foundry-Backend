@@ -448,9 +448,6 @@ export const deleteProjectPhase = async (req: Request, res: Response) => {
         return res.status(404).json({ success: false, message: "Project Phase Not Found" })
       }
 
-      console.log(check.rows[0])
-      console.log(userId)
-
       if (check.rows[0].user_id !== userId) {
         return res.status(403).json({ success: false, message: "Access Denied" })
       }
