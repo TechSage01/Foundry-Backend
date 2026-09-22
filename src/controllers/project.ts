@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { createPhaseSchema, createProjectSchema, updateProjectSchema } from "../schemas/project.js";
+import { createProjectSchema, updateProjectSchema } from "../schemas/project.js";
 import { slugify } from "../utils/helpers.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";

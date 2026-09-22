@@ -29,3 +29,31 @@ export const authMiddleware = async (req: Request, res: Response, next: Function
     return res.status(401).json({ success: false, message: "Forbidden" })
   }
 }
+
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: Function) => {
+  const token = process.env.NODE_ENV === "production" ? req.cookies.foundry_token : req.header("Authorization");
+  
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = verifyToken(token) as { id: string };
+
+    const { rows } = await pool.query(`
+      SELECT u.id, u.email, u.verified, p.username, p.full_name, p.headline, p.bio, p.avatar_url, p.location, p.skills, p.external_links
+      FROM users u
+      JOIN profiles p ON u.id = p.user_id
+      WHERE u.id = $1
+    `, [decoded.id])
+
+    if (!rows[0]) {
+      return res.status(404).json({ success: false, message: "User Not Found" })
+    }
+
+    req.user = rows[0];
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: "Forbidden" })
+  }
+}

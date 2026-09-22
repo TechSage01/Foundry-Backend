@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.js";
+import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
 import { createProject, deleteProject, fetchProjects, getProject, getUserProjects, updateProject } from "../controllers/project.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { createProjectPhase, deleteProjectPhase, toggleProjectPhase } from "../controllers/projectPhase.js";
-import { toggleProjectLike } from "../controllers/projectLikes.js";
+import { getProjectLikes, toggleProjectLike } from "../controllers/projectLikes.js";
 
 const router = Router();
 
@@ -12,8 +12,9 @@ const router = Router();
 router.get("/", fetchProjects)
 router.get("/:slug", getProject)
 router.get("/user/:username", getUserProjects)
+router.get("/:id/likes", optionalAuthMiddleware, getProjectLikes)
 
-// authenticated
+// projects
 router.post("/", authMiddleware, uploadLimiter, upload.single("cover_image"), createProject)
 router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updateProject)
 router.delete("/:id", authMiddleware, deleteProject)
