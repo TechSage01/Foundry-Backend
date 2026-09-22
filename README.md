@@ -27,10 +27,23 @@
 | `GET`    | `/api/projects/user/{username}`    | Get all projects from a user                  |
 | `PUT`    | `/api/projects/{id}`               | Update project                                | 
 | `DELETE` | `/api/projects/{id}`               | Delete project                                |
+
+
+### project phases
+
+| Method   | Endpoint                           | Description                                   |
+| -------- | ---------------------------------- | --------------------------------------------- |
 | `POST`   | `/api/projects/{id}/phases`        | Create a phase for a project                  |
 | `PATCH`  | `/api/projects/phases/{id}/toggle` | Toggle completion status for a project phase  |
 | `DELETE` | `/api/projects/phases/{id}`        | Delete a project phase                        |
+
+
+### project likes
+
+| Method   | Endpoint                           | Description                                   |
+| -------- | ---------------------------------- | --------------------------------------------- |
 | `POST`   | `/api/projects/{id}/likes`         | Toggle (create/delete) likes for projects     |    
+| `GET`    | `/api/projects/{id}/likes`         | Get a project likes count                     |    
 
 
 ### experiences
