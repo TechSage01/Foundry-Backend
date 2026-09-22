@@ -36,3 +36,7 @@ export const updatePhaseSchema = createPhaseSchema
   .refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided to update",
   });
+
+export const projectLikeParamSchema = z.object({
+  projectId: z.string().uuid("Invalid project UUID"),
+});
