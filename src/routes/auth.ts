@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport.js"
-import { getMe, issueCallbackToken } from "../controllers/auth.js";
+import { getMe, issueCallbackToken, signin } from "../controllers/auth.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
 const router = Router();
@@ -23,5 +23,9 @@ router.get("/github/callback",
   }),
   issueCallbackToken
 )
+
+if (process.env.NODE_ENV !== "production") {
+  router.post("/signin", signin, issueCallbackToken)
+}
 
 export default router;

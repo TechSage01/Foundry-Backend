@@ -3,7 +3,7 @@ import { verifyToken } from "../utils/jwt.js";
 import pool from "../config/db.js";
 
 export const authMiddleware = async (req: Request, res: Response, next: Function) => {
-  const token = req.cookies.foundry_token;
+  const token = process.env.NODE_ENV === "production" ? req.cookies.foundry_token : req.header("Authorization");
   
   if (!token) {
     return res.status(401).json({ success: false, message: "Unauthorized Access"})

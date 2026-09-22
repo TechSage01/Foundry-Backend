@@ -51,24 +51,11 @@ CREATE TABLE IF NOT EXISTS project_phases (
 
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
-
-CREATE TRIGGER trg_projects_updated_at
-  BEFORE UPDATE ON projects
-  FOR EACH ROW
-  EXECUTE FUNCTION set_updated_at();
-
-CREATE TRIGGER trg_experiences_updated_at
-  BEFORE UPDATE ON experiences
-  FOR EACH ROW
-  EXECUTE FUNCTION set_updated_at();
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TRIGGER IF EXISTS trg_projects_updated_at ON projects;
-DROP TRIGGER IF EXISTS trg_experiences_updated_at ON experiences;
-
-DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS experiences;
 DROP TABLE IF EXISTS project_phases;
+DROP TABLE IF EXISTS projects;
 -- +goose StatementEnd

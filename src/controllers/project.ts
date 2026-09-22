@@ -417,3 +417,47 @@ export const toggleProjectPhase = async (req: Request, res: Response) => {
     });
   }
 }
+
+// @route DELETE /api/projects/phases/{id}
+// @desc Delete a project phase
+// @access Owner only
+export const deleteProjectPhase = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Project Phase Id "})
+  }
+
+  try {
+    const { rowCount } = await pool.query(`
+      DELETE FROM project_phases ph
+      USING projects p
+      WHERE ph.id = $1 AND ph.project_id = p.id AND p.user_id = $2
+    `, [id, userId])
+
+    if (rowCount === 0) {
+      const check = await pool.query(`
+        SELECT p.user_id 
+        FROM projects p
+        JOIN project_phases ph ON p.id = ph.project_id 
+        WHERE ph.id = $1
+      `, [id])
+
+      if (check.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Project Phase Not Found" })
+      }
+
+      console.log(check.rows[0])
+      console.log(userId)
+
+      if (check.rows[0].user_id !== userId) {
+        return res.status(403).json({ success: false, message: "Access Denied" })
+      }
+    }
+
+    return res.status(200).json({ success: true, message: "Project Phase Deleted" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete project phase" })
+  }  
+}
