@@ -50,6 +50,7 @@
 | `GET`    | `/api/posts`                       | Fetch all published posts                        |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
+| `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
 
 
 ### follows
