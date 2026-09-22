@@ -363,7 +363,7 @@ export const createProjectPhase = async (req: Request, res: Response) => {
 // @access Owner only
 export const toggleProjectPhase = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const userId = req.user;
+  const userId = req.user?.id;
 
   if (!id || !isUuid(id)) {
     return res.status(400).json({ success: false, message: "Invalid Project Phase Id" })
@@ -385,7 +385,7 @@ export const toggleProjectPhase = async (req: Request, res: Response) => {
       const check = await pool.query(
         `SELECT p.user_id
          FROM projects p
-         JOIN projects_phases ph ON ph.project_id = p.id
+         JOIN project_phases ph ON ph.project_id = p.id
          WHERE ph.id = $1`,
         [id]
       );
@@ -413,7 +413,8 @@ export const toggleProjectPhase = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: `Failed to toggle project phases`
+      message: `Failed to toggle project phases`,
+      error
     });
   }
 }
