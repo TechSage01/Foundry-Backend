@@ -10,8 +10,8 @@ const router = Router();
 
 // public
 router.get("/", fetchProjects)
-router.get("/:slug", getProject)
 router.get("/user/:username", getUserProjects)
+router.get("/:slug", optionalAuthMiddleware, getProject)
 router.get("/:id/likes", optionalAuthMiddleware, getProjectLikes)
 
 // projects

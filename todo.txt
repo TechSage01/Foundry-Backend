@@ -1,1 +1,1 @@
-test UPDATE project phase endpoint
+pentest all endpoints

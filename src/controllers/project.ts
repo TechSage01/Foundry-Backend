@@ -121,27 +121,62 @@ export const fetchProjects = async (req: Request, res: Response) => {
 // @access Public
 export const getProject = async (req: Request, res: Response) => {
   const { slug } = req.params;
+  const userId = req.user?.id;
 
   if (slug === "") {
     return res.status(400).json({ success: false, message: "Invalid Slug" })
   }
 
   try {
-    const { rows } = await pool.query(
-      `UPDATE projects
+    // 1. get the project
+    const projects = await pool.query(`
+      UPDATE projects
       SET views_count = views_count + 1
       WHERE slug = $1 AND is_published = true
       RETURNING *
-      `
-    , [slug])
+    `, [slug])
 
-    if (!rows[0]) {
+    if (!projects.rows[0]) {
       return res.status(404).json({ success: false, message: "Project Not Found." })
     }
 
-    return res.status(200).json({ success: true, message: "", data: rows[0] })
+    const project = projects.rows[0]
+
+    // 2. get the project phases & likes
+    const [likesResult, phaseResult] = await Promise.all([
+      pool.query(`
+        SELECT 
+          COUNT(*)::INTEGER AS likes_count,
+          EXISTS (
+            SELECT 1 FROM project_likes WHERE user_id = $1 AND project_id = $2
+          ) AS is_liked 
+        FROM project_likes
+        WHERE project_id = $2
+      `, [userId, project.id]),
+      pool.query(`
+        SELECT 
+          id, 
+          title, 
+          description, 
+          is_completed, 
+          order_index, 
+          created_at
+        FROM project_phases
+        WHERE project_id = $1
+        ORDER BY order_index ASC, created_at ASC  
+      `, [project.id])
+    ])
+
+    const responseData = {
+      ...project,
+      likes_count: likesResult.rows[0]?.likes_count ?? 0,
+      is_liked: likesResult.rows[0]?.is_liked ?? false,
+      phases: phaseResult.rows,
+    };
+
+    return res.status(200).json({ success: true, message: "", data: responseData })
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to fetch projects details" })
+    return res.status(500).json({ success: false, message: "Failed to fetch projects details", error })
   }
 }
 
