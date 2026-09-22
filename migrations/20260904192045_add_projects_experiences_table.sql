@@ -51,11 +51,22 @@ CREATE TABLE IF NOT EXISTS project_phases (
 
   FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS project_likes (
+  user_id UUID NOT NULL,
+  project_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  PRIMARY KEY (user_id, project_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS experiences;
+DROP TABLE IF EXISTS project_likes;
 DROP TABLE IF EXISTS project_phases;
+DROP TABLE IF EXISTS experiences;
 DROP TABLE IF EXISTS projects;
 -- +goose StatementEnd
