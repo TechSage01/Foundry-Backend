@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createProject, createProjectPhase, deleteProject, deleteProjectPhase, fetchProjects, getProject, getUserProjects, toggleProjectLike, toggleProjectPhase, updateProject } from "../controllers/project.js";
+import { createProject, deleteProject, fetchProjects, getProject, getUserProjects, updateProject } from "../controllers/project.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
+import { createProjectPhase, deleteProjectPhase, toggleProjectPhase } from "../controllers/projectPhase.js";
+import { toggleProjectLike } from "../controllers/projectLikes.js";
 
 const router = Router();
 
