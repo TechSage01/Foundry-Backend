@@ -268,3 +268,49 @@ export const updatePost = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to update post", error })
   }
 }
+
+// @route DELETE /api/posts/:id
+// @desc delete a post
+// @access Owner only
+export const deletePost = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Post Id Missing" })
+  }
+
+  try {
+    const posts = await pool.query(`
+      SELECT user_id FROM posts WHERE id = $1
+    `, [id])
+
+    if (posts.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post Not Found" })
+    } 
+
+    // IDOR check
+    if (posts.rows[0].user_id !== userId) {
+      return res.status(403).json({ success: false, message: "Access Denied" })
+    }
+
+    const post = posts.rows[0]
+
+    // 403: time limit
+    const TEN_MINUTES_MS = 10 * 60 * 1000;
+    const createdAtMs = new Date(post.created_at).getTime();
+
+    if (Date.now() - createdAtMs > TEN_MINUTES_MS) {
+      return res.status(403).json({ success: false, message: "Forbidden: posts can only be deleted within 10 minutes of creation." })
+    }
+
+    // delete post
+    await pool.query(`
+      DELETE FROM posts WHERE id = $1 AND user_id = $2
+    `, [id, userId])
+
+    return res.status(200).json({ success: true, message: "Post Deleted Successfully" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete post" })
+  }
+}

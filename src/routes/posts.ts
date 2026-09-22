@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createPost, getPost, getPublishedPosts, updatePost } from "../controllers/posts.js";
+import { createPost, deletePost, getPost, getPublishedPosts, updatePost } from "../controllers/posts.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 
@@ -13,5 +13,6 @@ router.get("/:slug", getPost)
 // Authenticated
 router.post("/", authMiddleware, uploadLimiter, upload.single("cover_image"), createPost)
 router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updatePost)
+router.delete("/:id", authMiddleware, deletePost)
 
 export default router;

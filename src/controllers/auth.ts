@@ -45,6 +45,11 @@ export const getMe = (req: Request, res: Response) => {
 }
 
 export const signin = async (req: Request, res: Response, next: Function) => {
+  const { email } = req.body;
+  if (!email || email == "") {
+    return res.status(400)
+  }
+  
   const client = await pool.connect();
 
   try {
