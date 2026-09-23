@@ -5,6 +5,13 @@ import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
-router.put("/", authMiddleware, upload.single("avatar"), updateProfile)
+router.put("/", 
+  authMiddleware, 
+  upload.fields([
+    { name: "avatar", maxCount: 1 },
+    { name: "cover_image", maxCount: 1 }
+  ]), 
+  updateProfile
+)
 
 export default router;

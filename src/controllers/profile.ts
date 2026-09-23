@@ -70,13 +70,27 @@ export const updateProfile = async (req: Request, res: Response) => {
       }
     }
 
-    let avatarUrl: string | null = null;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    if (req.file) {
+    const avatarFile = files?.["avatar"]?.[0];
+    const coverImageFile = files?.["cover_image"]?.[0];
+
+    let avatarUrl: string | null = null;
+    let coverImageUrl: string | null = null;
+
+    if (avatarFile) {
       avatarUrl = await uploadFile(
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype
+        avatarFile.buffer,
+        avatarFile.originalname,
+        avatarFile.mimetype
+      )
+    }
+
+    if (coverImageFile) {
+      coverImageUrl = await uploadFile(
+        coverImageFile.buffer,
+        coverImageFile.originalname,
+        coverImageFile.mimetype
       )
     }
 
@@ -89,10 +103,11 @@ export const updateProfile = async (req: Request, res: Response) => {
           bio = COALESCE($4, bio),
           location = COALESCE($5, location),
           avatar_url = COALESCE ($6, avatar_url),
-          skills = COALESCE($7, skills),
-          external_links = COALESCE($8, external_links),
+          cover_image_url = COALESCE ($7, cover_image_url),
+          skills = COALESCE($8, skills),
+          external_links = COALESCE($9, external_links),
           updated_at = NOW()
-        WHERE user_id = $9
+        WHERE user_id = $10
         RETURNING user_id, username, full_name, headline, bio, avatar_url, location, skills, external_links, updated_at`,
       [
         cleanUsername,
@@ -101,6 +116,7 @@ export const updateProfile = async (req: Request, res: Response) => {
         bio ?? null,
         location ?? null,
         avatarUrl,
+        coverImageUrl,
         skills ?? null,
         external_links ? JSON.stringify(external_links) : null,
         id,
