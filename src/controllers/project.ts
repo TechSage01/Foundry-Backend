@@ -99,7 +99,11 @@ export const fetchProjects = async (req: Request, res: Response) => {
     // filter by tech stack array
     if (tag) {
       params.push(tag);
-      query += ` AND $${params.length} = ANY(p.tech_stack)`;
+      query += ` AND EXISTS (
+        SELECT 1 
+        FROM unnest(p.tech_stack) AS item 
+        WHERE LOWER(item) = $${params.length}
+      )`;
     }
 
     params.push(limit, offset)
