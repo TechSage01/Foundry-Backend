@@ -3,6 +3,5 @@ dist/
 hack/
 node_modules/
 migrations/
-wifi/
 README.md
 .gitignore
