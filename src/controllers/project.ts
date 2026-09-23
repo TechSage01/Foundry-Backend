@@ -32,6 +32,7 @@ export const createProject = async (req: Request, res: Response) => {
   }
 
   const { title, tagline, description, demo_url, github_url, tech_stack, is_published } = validation.data;
+  const lower_tech_stack = tech_stack.map((stack: string) => stack.toLowerCase())
 
   let coverImageUrl: string | null = validation.data.cover_image_url ?? null;
   if (req.file) {
@@ -51,7 +52,7 @@ export const createProject = async (req: Request, res: Response) => {
         (id, user_id, title, slug, tagline, description, cover_image_url, demo_url, github_url, tech_stack, is_published)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::text[], $11)
        RETURNING *`,
-      [projectId, id, title, slug, tagline, description, coverImageUrl, demo_url, github_url, tech_stack ?? [], is_published]
+      [projectId, id, title, slug, tagline, description, coverImageUrl, demo_url, github_url, lower_tech_stack ?? [], is_published]
     );
 
     return res.status(201).json({ success: true, message: "Project Created", data: rows[0] });
@@ -68,7 +69,8 @@ export const fetchProjects = async (req: Request, res: Response) => {
   const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
   const page = Math.max(parseInt(req.query.page as string) || 1, 1);
   const offset = (page - 1) * limit
-  const tag = req.query.tag as string | undefined;
+  const rawTag = req.query.tag as string | undefined;
+  const tag = rawTag?.toLowerCase()
 
   try {
     let query = `

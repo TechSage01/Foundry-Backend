@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   headline VARCHAR(150),
   bio TEXT,
   avatar_url TEXT,
+  cover_image_url TEXT,
   location VARCHAR(100),
   skills TEXT[] NOT NULL DEFAULT '{}'::TEXT[],
   external_links JSONB NOT NULL DEFAULT '{}'::JSONB,
