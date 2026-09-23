@@ -13,7 +13,7 @@ export const authMiddleware = async (req: Request, res: Response, next: Function
     const decoded = verifyToken(token) as { id: string };
 
     const { rows } = await pool.query(`
-      SELECT u.id, u.email, u.verified, p.username, p.full_name, p.headline, p.bio, p.avatar_url, p.location, p.skills, p.external_links
+      SELECT u.id, u.email, u.verified, p.username, p.full_name, p.headline, p.bio, p.avatar_url, p.cover_image_url, p.location, p.skills, p.external_links
       FROM users u
       JOIN profiles p ON u.id = p.user_id
       WHERE u.id = $1
