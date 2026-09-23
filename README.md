@@ -90,7 +90,8 @@ Updates the authenticated user's profile.
 
 | Field            | Type          | Required | Description                                        |
 | ---------------- | ------------- | -------- | -------------------------------------------------- |
-| `avatar`         | File          | No       | Profile avatar. Maximum size: 3MB.                 |
+| `avatar`         | File          | No       | Profile avatar. Maximum size: 2MB.                 |
+| `cover_image`    | File          | No       | Profile cover image. Maximum size: 2MB.            |
 | `username`       | string        | No       | User's username.                                   |
 | `full_name`      | string        | No       | User's full name.                                  |
 | `headline`       | string | null | No       | User's profile headline.                           |
