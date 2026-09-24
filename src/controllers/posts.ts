@@ -4,7 +4,6 @@ import { uploadFile } from "../config/imagekit.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import { calculateReadingTime, slugify } from "../utils/helpers.js";
 import pool from "../config/db.js";
-import { deflate } from "node:zlib";
 
 // @route POST /api/posts
 // @desc create a new posts
@@ -15,7 +14,7 @@ export const createPost = async (req: Request, res: Response) => {
 
   if (typeof payload.tags === "string") {
     try {
-      payload.tags = JSON.parse(payload.tags);
+      payload.tags = JSON.parse(payload.tags.toLowerCase());
     } catch {
       payload.tags = payload.tags.split(",").map((t: string) => t.trim()).filter(Boolean);
     }
