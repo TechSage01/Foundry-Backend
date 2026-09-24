@@ -62,6 +62,8 @@
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/posts`                       | Create new posts                                 |
 | `GET`    | `/api/posts`                       | Fetch all published posts                        |
+| `GET`    | `/api/posts/me`                    | Fetch all owned posts for a user                 |
+| `GET`    | `/api/posts/me/drafts`             | Fetch all owned posts drafts for a user          |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
