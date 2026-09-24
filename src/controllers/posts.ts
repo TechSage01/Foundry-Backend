@@ -71,6 +71,82 @@ export const createPost = async (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/posts/me
+// @desc get all owned posts for the authenticated user
+// @access Authenticated users
+export const getMyPosts = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT 
+         id, 
+         title, 
+         slug, 
+         subtitle,
+         content, 
+         cover_image_url, 
+         tags,
+         is_published,
+         views_count, 
+         created_at
+       FROM posts 
+       WHERE user_id = $1 AND is_published = true
+       ORDER BY created_at DESC 
+       LIMIT $2`,
+      [userId, limit]
+    );
+
+    if (rows.length < 1) {
+      return res.status(404).json({ success: false, message: "Posts Not Found" })
+    }
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to get posts" })
+  }
+}
+
+// @route GET /api/posts/me/drafts
+// @desc get all owned posts drafts for the authenticated user
+// @access Authenticated users
+export const getMyDrafts = async (req: Request, res: Response) => {
+ const userId = req.user?.id;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+
+  try {
+    const { rows } = await pool.query(
+      `SELECT 
+         id, 
+         title, 
+         slug, 
+         subtitle,
+         content, 
+         cover_image_url, 
+         tags,
+         is_published,
+         views_count, 
+         created_at
+       FROM posts 
+       WHERE user_id = $1 AND is_published = false
+       ORDER BY created_at DESC 
+       LIMIT $2`,
+      [userId, limit]
+    );
+
+    if (rows.length < 1) {
+      return res.status(404).json({ success: false, message: "Drafts Not Found" })
+    }
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to get drafts" })
+  } 
+}
+
 // @route GET /api/posts
 // @desc get all published posts
 // @access Public
