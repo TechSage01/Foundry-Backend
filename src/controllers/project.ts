@@ -197,6 +197,23 @@ export const getUserProjects = async (req: Request, res: Response) => {
   }
 
   try {
+    // get user profile
+    const profileResult = await pool.query(
+      `SELECT user_id, username, full_name, avatar_url, headline
+       FROM profiles
+       WHERE LOWER(username) = LOWER($1)`,
+      [username.trim()]
+    );
+
+    if (profileResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User profile not found",
+      });
+    }
+
+    const author = profileResult.rows[0];
+
     const { rows } = await pool.query(
       `SELECT 
          p.id,
@@ -208,23 +225,46 @@ export const getUserProjects = async (req: Request, res: Response) => {
          p.demo_url,
          p.github_url,
          p.tech_stack,
-         p.is_published,
+         p.views_count,
          p.created_at,
-         p.updated_at
+         p.updated_at,
+         (
+           SELECT COUNT(*)::INTEGER 
+           FROM project_likes 
+           WHERE project_id = p.id
+         ) AS likes_count,
+         (
+           SELECT COUNT(*)::INTEGER 
+           FROM project_phases 
+           WHERE project_id = p.id
+         ) AS total_phases,
+         (
+           SELECT COUNT(*)::INTEGER 
+           FROM project_phases 
+           WHERE project_id = p.id AND is_completed = true
+         ) AS completed_phases
        FROM projects p
-       JOIN profiles prof ON p.user_id = prof.user_id
-       WHERE LOWER(prof.username) = LOWER($1) AND p.is_published = true
+       WHERE p.user_id = $1 AND p.is_published = true
        ORDER BY p.created_at DESC`,
-      [username.trim()]
+      [author.user_id]
     );
 
     if (rows.length < 1) {
       return res.status(404).json({ success: false, message: "Projects Not Found" });
     }
 
-    return res.status(200).json({ success: true, message: "", data: rows });
+    // remove userId from response
+    const { user_id, ...authorRes } = author;
+
+    return res.status(200).json({ 
+      success: true, 
+      data: {
+        author: authorRes,
+        projects: rows
+      }
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: "Failed to fetch Projects" })
+    return res.status(500).json({ success: false, message: "Failed to fetch Projects", error })
   }
 }
 
