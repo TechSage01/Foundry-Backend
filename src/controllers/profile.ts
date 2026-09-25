@@ -39,7 +39,7 @@ export const updateProfile = async (req: Request, res: Response) => {
       return res.status(400).json({ 
         success: false, 
         message: "Invalid Request Payload", 
-        details: validation.error.flatten().fieldErrors 
+        errors: validation.error.flatten().fieldErrors 
       })
     }
 

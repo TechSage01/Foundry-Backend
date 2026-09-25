@@ -11,7 +11,7 @@ export const createExperience = async (req: Request, res: Response) => {
 
   const validation = createExperienceSchema.safeParse(req.body)
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+    return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
   try {
@@ -111,7 +111,7 @@ export const updateExperience = async (req: Request, res: Response) => {
 
   const validation = updateExperienceSchema.safeParse(req.body);
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+    return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
   const {

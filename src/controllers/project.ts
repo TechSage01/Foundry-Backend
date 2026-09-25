@@ -28,7 +28,7 @@ export const createProject = async (req: Request, res: Response) => {
   // validate request
   const validation = createProjectSchema.safeParse(payload);
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: 'Validation failed', details: validation.error.flatten().fieldErrors });
+    return res.status(400).json({ success: false, message: 'Validation failed', errors: validation.error.flatten().fieldErrors });
   }
 
   const { title, tagline, description, demo_url, github_url, tech_stack, is_published } = validation.data;
@@ -295,7 +295,7 @@ export const updateProject = async (req: Request, res: Response) => {
 
   const validation = updateProjectSchema.safeParse(payload);
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+    return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
   const hasBodyFields = validation.data && Object.keys(validation.data).length > 0;

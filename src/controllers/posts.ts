@@ -26,7 +26,7 @@ export const createPost = async (req: Request, res: Response) => {
 
   const validation = createPostSchema.safeParse(payload)
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors })
+    return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
   const { title, subtitle, content, tags, is_published } = validation.data;
@@ -264,7 +264,7 @@ export const updatePost = async (req: Request, res: Response) => {
   };
 
   if (!validation.success) {
-    return res.status(400).json({ success: false, message: "Invalid Request", details: validation.error.flatten().fieldErrors})
+    return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors})
   }
 
   const { title, subtitle, content, tags, is_published } = validation.data;

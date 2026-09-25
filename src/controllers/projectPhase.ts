@@ -21,7 +21,7 @@ export const createProjectPhase = async (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       message: "Validation failed",
-      details: {
+      errors: {
       ...fieldErrors,
       ...(formErrors.length > 0 && { _form: formErrors }),
     }})
