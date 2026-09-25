@@ -78,6 +78,12 @@
 | `GET`    | `/api/users/{username}/followers`  | Get a list of followers for a user               |
 | `GET`    | `/api/users/{username}/following`  | Get a list of users the user is following        |
 
+### opportunities
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/opportunities/`              | Create a new opportunity                         |
+
 <br><br>
 
 ## Docs
@@ -270,5 +276,29 @@ Updates a post for the authenticated user.
 | `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
 
 <br>
+
+---
+
+**`POST /api/opportunities`**
+
+Create a new opportunity.
+
+**Request Body**
+
+```json
+{
+  "category": "string",
+  "title": "string",
+  "description": "string",
+  "required_skills": "string[] e.g JSON.stringify(['Java', 'AI']) | null",
+  "work_arrangement": "remote | hybrid | onsite",
+  "location_range": "string | null",
+  "compensation": "string | null",
+  "deadline_at": "Date | null",
+  "fast_apply_enabled": "Boolean | null",
+  "external_apply_url": "string | null",
+  "screening_prompt": "string | null"
+}
+```
 
 
