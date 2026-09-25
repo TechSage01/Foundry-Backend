@@ -82,7 +82,8 @@
 
 | Method   | Endpoint                           | Description                                      |
 | -------- | ---------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/opportunities/`              | Create a new opportunity                         |
+| `POST`   | `/api/opportunities`               | Create a new opportunity                         |
+| `GET`    | `/api/opportunities`               | Fetch all opportunities                          |
 
 <br><br>
 
@@ -300,5 +301,24 @@ Create a new opportunity.
   "screening_prompt": "string | null"
 }
 ```
+
+<br>
+
+---
+
+**`GET /api/opportunities`**
+
+Fetches a paginated list of opportunities with optional filtering.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `50` | Number of items per page (max 50) |
+| `category` | `string` | No | `null` | Filter opportunities by category (e.g., `Freelance`) |
+| `work_arrangement` | `string` | No | `null` | Filter opportunities by work arrangement (e.g., `remote`) |
+| `skill` | `string` | No | `null` | Filter opportunities by skill (e.g., `Java`) |
+
 
 
