@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { createOpportunitiesSchema } from "../schemas/opportunity.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 
 // @route POST /api/opportunities
@@ -116,7 +116,6 @@ export const fetchOpportunities = async (req: Request, res: Response) => {
       pool.query(
         `SELECT 
            o.id,
-           o.user_id,
            o.category,
            o.title,
            o.description,
@@ -157,6 +156,53 @@ export const fetchOpportunities = async (req: Request, res: Response) => {
     })
   } catch (error) {
     
+  }
+}
+
+// @route GET /api/opportunities/:id
+// @desc get a single opportunity
+// @access Public
+export const getOpportunity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Id" })
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        o.id,
+        o.category,
+        o.title,
+        o.description,
+        o.required_skills,
+        o.work_arrangement,
+        o.location_range,
+        o.compensation,
+        o.deadline_at,
+        o.fast_apply_enabled,
+        o.external_apply_url,
+        o.screening_prompt,
+        o.created_at,
+        o.updated_at,
+        p.username,
+        p.full_name,
+        p.avatar_url,
+        p.headline
+      FROM opportunities o
+      JOIN profiles p ON o.user_id = p.user_id
+      WHERE o.id = $1
+    `, [id])
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Opportunity Not Found" })
+    }
+
+    return res.status(200).json({ success: true, data: rows[0] })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to get opportunity", error })
   }
 }
 

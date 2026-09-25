@@ -84,6 +84,7 @@
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/opportunities`               | Create a new opportunity                         |
 | `GET`    | `/api/opportunities`               | Fetch all opportunities                          |
+| `GET`    | `/api/opportunities/{id}`           | Get a single opportunity                         |
 
 <br><br>
 
