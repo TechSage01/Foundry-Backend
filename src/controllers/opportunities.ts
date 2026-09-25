@@ -71,3 +71,92 @@ export const createOpportunities = async (req: Request, res: Response) => {
   }
 } 
 
+// @route GET /api/opportunities
+// @desc fetch all available opportunities
+// @access Public
+export const fetchOpportunities = async (req: Request, res: Response) => {
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+
+  const category = (req.query.category as string)?.toLowerCase();
+  const workArrangement = (req.query.work_arrangement as string)?.toLowerCase();
+  const skill = (req.query.skill as string)?.toLowerCase();
+
+  try {
+    const whereConditions: string[] = [];
+    const params: (string | number)[] = [];
+
+    // Filter by Category (full_time, cofounder, bounty, hackathon, grant, freelance)
+    if (category) {
+      params.push(category);
+      whereConditions.push(`o.category = $${params.length}`);
+    }
+
+    // Filter by Work Arrangement (remote, hybrid, onsite)
+    if (workArrangement) {
+      params.push(workArrangement);
+      whereConditions.push(`o.work_arrangement = $${params.length}`);
+    }
+
+    // Filter by Skill Tag inside PostgreSQL array
+    if (skill) {
+      params.push(skill);
+      whereConditions.push(`$${params.length} = ANY(o.required_skills)`);
+    }
+
+    const whereClause =
+      whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+
+    const [countResult, opportunitiesResult] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(*)::INTEGER AS total FROM opportunities o ${whereClause}`,
+        params
+      ),
+      pool.query(
+        `SELECT 
+           o.id,
+           o.user_id,
+           o.category,
+           o.title,
+           o.description,
+           o.required_skills,
+           o.work_arrangement,
+           o.location_range,
+           o.compensation,
+           o.deadline_at,
+           o.fast_apply_enabled,
+           o.external_apply_url,
+           o.screening_prompt,
+           o.created_at,
+           o.updated_at,
+           p.username,
+           p.full_name,
+           p.avatar_url,
+           p.headline
+         FROM opportunities o
+         JOIN profiles p ON o.user_id = p.user_id
+         ${whereClause}
+         ORDER BY o.created_at DESC
+         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
+        [...params, limit, offset]
+      ),
+    ]);
+
+    const total = countResult.rows[0]?.total ?? 0;
+
+    return res.status(200).json({ 
+      success: true,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      data: opportunitiesResult.rows, 
+    })
+  } catch (error) {
+    
+  }
+}
+
