@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { createOpportunitiesSchema } from "../schemas/opportunity.js";
+import { createOpportunitiesSchema, updateOpportunitiesSchema } from "../schemas/opportunity.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 
 // @route POST /api/opportunities
 // @desc create a new opportunity
 // @access Authenticated users only
-export const createOpportunities = async (req: Request, res: Response) => {
+export const createOpportunity = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   try {
@@ -206,3 +206,117 @@ export const getOpportunity = async (req: Request, res: Response) => {
   }
 }
 
+// @route PUT /api/opportunities/:id
+// @desc update an opportunity
+// @access author only
+export const updateOpportunity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Opportunity Id" })
+  }
+
+  const validation = updateOpportunitiesSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  };
+
+  const { category, title, description, required_skills, work_arrangement, location_range, compensation, deadline_at, fast_apply_enabled, external_apply_url, screening_prompt } = validation.data;
+
+  try {
+    const check = await pool.query(`
+      SELECT user_id FROM opportunities WHERE id = $1
+    `, [id])
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Opportunity Not Found" })
+    }
+
+    if (check.rows[0].user_id != userId) {
+      return res.status(403).json({ success: false, message: "Access Denied" })
+    }
+
+    const normalizedSkills = required_skills
+      ? required_skills.map((s) => s.trim().toLowerCase())
+      : null;
+
+    const { rows } = await pool.query(`
+      UPDATE opportunities
+      SET category = COALESCE($1, category),
+          title = COALESCE($2, title),
+          description = COALESCE($3, description),
+          required_skills = COALESCE($4, required_skills),
+          work_arrangement = COALESCE($5, work_arrangement),
+          location_range = COALESCE($6, location_range),
+          compensation = COALESCE($7, compensation),
+          deadline_at = COALESCE($8, deadline_at),
+          fast_apply_enabled = COALESCE($9, fast_apply_enabled),
+          external_apply_url = COALESCE($10, external_apply_url),
+          screening_prompt = COALESCE($11, screening_prompt)
+      WHERE id = $12 AND user_id = $13
+    `, 
+    [
+      category?.trim() ?? null,
+      title?.trim() ??  null,
+      description?.trim() ?? null,
+      normalizedSkills ?? null,
+      work_arrangement ?? null,
+      location_range?.trim() ?? null,
+      compensation?.trim() ?? null,
+      deadline_at ?? null,
+      fast_apply_enabled ?? null,
+      external_apply_url ?? null,
+      screening_prompt?.trim() ?? null,
+      id,
+      userId
+    ]);
+
+
+    return res.status(200).json({ success: true, message: "Opportunity Updated" })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to update opportunity"})
+  }
+}
+
+// @route DELETE /api/opportunities/:id
+// @desc delete an opportunity
+// @access author only
+export const deleteOpportunity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Opportunity Id" })
+  }
+
+  try {
+    const { rowCount } = await pool.query(`
+      DELETE FROM opportunities WHERE id = $1 AND user_id = $2
+    `, [id, userId])
+
+    if (rowCount === 0) {
+      // existence & ownership check
+      const check = await pool.query(`
+        SELECT user_id FROM opportunities WHERE id = $1
+      `, [id])
+
+      if (check.rows.length === 0) {
+        return res.status(404).json({ success: false, message: "Opportunity Not Found" })
+      }
+
+      if (check.rows[0].user_id !== userId) {
+        return res.status(403).json({ success: false, message: "Access Denied" })
+      }
+    }
+
+    return res.status(200).json({ success: true, message: "Opportunity deleted successfully" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete opportunity" })
+  }
+}

@@ -26,7 +26,7 @@ export const authMiddleware = async (req: Request, res: Response, next: Function
     req.user = rows[0];
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, message: "Forbidden" })
+    return res.status(401).json({ success: false, message: "Unauthorized Access" })
   }
 }
 

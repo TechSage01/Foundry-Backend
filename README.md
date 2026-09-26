@@ -84,7 +84,9 @@
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/opportunities`               | Create a new opportunity                         |
 | `GET`    | `/api/opportunities`               | Fetch all opportunities                          |
-| `GET`    | `/api/opportunities/{id}`           | Get a single opportunity                         |
+| `GET`    | `/api/opportunities/{id}`          | Get a single opportunity                         |
+| `PUT`    | `/api/opportunities/{id}`          | Update an opportunity                            |
+| `DELETE` | `/api/opportunities/{id}`          | Delete an opportunity                            |
 
 <br><br>
 
