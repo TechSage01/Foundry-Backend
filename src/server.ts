@@ -10,6 +10,7 @@ import profileRouter from "./routes/profile.js"
 import projectRouter from "./routes/projects.js"
 import experienceRouter from "./routes/experience.js"
 import opportunitiesRouter from "./routes/opportunities.js"
+import communitiesRouter from "./routes/community.js"
 import postRouter from "./routes/posts.js"
 import userRouter from "./routes/user.js"
 import pool from "./config/db.js";
@@ -50,6 +51,7 @@ app.use("/api/experiences", experienceRouter)
 app.use("/api/posts", postRouter)
 app.use("/api/users", userRouter)
 app.use("/api/opportunities", opportunitiesRouter)
+app.use("/api/communities", communitiesRouter)
 
 
 const PORT = process.env.PORT || 5000;

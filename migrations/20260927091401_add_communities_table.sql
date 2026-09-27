@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS communities (
   slug VARCHAR(100) NOT NULL,
   category VARCHAR(50) NOT NULL,
   description TEXT NOT NULL,
+  icon_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 
