@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createOpportunity, deleteOpportunity, fetchOpportunities, getOpportunity, updateOpportunity } from "../controllers/opportunities.js";
+import { createOpportunity, deleteOpportunity, fetchOpportunities, getMyOpportunities, getOpportunity, updateOpportunity } from "../controllers/opportunities.js";
 
 const router = Router();
+
+router.get("/me", authMiddleware, getMyOpportunities)
 
 // Public
 router.get("/", fetchOpportunities)

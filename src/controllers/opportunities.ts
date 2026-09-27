@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { createOpportunitiesSchema, updateOpportunitiesSchema } from "../schemas/opportunity.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
+import { Opportunity } from "../types/opportunity.js";
 
 // @route POST /api/opportunities
 // @desc create a new opportunity
@@ -158,6 +159,60 @@ export const fetchOpportunities = async (req: Request, res: Response) => {
     
   }
 }
+
+// @route GET /api/opportunities/me
+// @desc get all opportunities posted by a user
+// @access author only
+export const getMyOpportunities = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+
+  try {
+    const [countResult, opporResult] = await Promise.all([
+      pool.query(
+        `SELECT COUNT(*)::INTEGER AS total FROM opportunities WHERE user_id = $1`,
+        [userId]
+      ),
+      pool.query(`
+        SELECT * 
+        FROM opportunities 
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3
+      `, [userId, limit, offset])
+    ])
+
+    if (opporResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Opportunities Not Found" })
+    }
+
+    const total = countResult.rows[0].total ?? 0;
+
+    const opportunities: Opportunity[] = opporResult.rows;
+    const data: any[] = [];
+
+    opportunities.forEach((op: Opportunity) => {
+      const { user_id, ...opRes } = op;
+      data.push(opRes)
+    })
+
+    return res.status(200).json({ 
+      success: true, 
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      },
+      data 
+    })
+  } catch (error) {
+    
+  }
+} 
 
 // @route GET /api/opportunities/:id
 // @desc get a single opportunity
