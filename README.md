@@ -97,6 +97,7 @@
 | `GET`    | `/api/communities`                 | Fetch all communities                            |
 | `GET`    | `/api/communities/{slug}`          | Get a single community by slug                   |
 | `POST`   | `/api/communities/{id}/join`       | Join a community                                 |
+| `POST`   | `/api/communities/{id}/leave`      | Leave a community                                |
 
 <br><br>
 

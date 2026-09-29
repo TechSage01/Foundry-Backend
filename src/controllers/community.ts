@@ -239,3 +239,56 @@ export const joinCommunity = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to join community" })
   }
 }
+
+// @route POST /api/communities/:id/leave
+// @desc Leave a community
+// @access Authenticated user
+export const leaveCommunity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Community Id" })
+  }
+
+  try {
+    // community check
+    const communityCheck = await pool.query(`
+      SELECT
+        id
+      FROM communities
+      WHERE id = $1
+    `, [id]);
+
+    if (communityCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Community Not Found" })
+    }
+
+    // membership check
+    const membershipCheck = await pool.query(`
+      SELECT 
+        role
+      FROM community_members
+      WHERE community_id = $1 AND user_id = $2
+    `, [id, userId]);
+
+    if (membershipCheck.rows.length === 0) {
+      return res.status(400).json({ success: false, message: "You are not a member of this community."})
+    }
+
+    if (membershipCheck.rows[0].role === "owner") {
+      return res.status(400).json({ success: false, message: "Owners cannot leave their own community, Delete the community instead." })
+    }
+
+    await pool.query(`
+      DELETE 
+      FROM community_members 
+      WHERE community_id = $1 AND user_id = $2
+    `, [id, userId])
+
+    return res.status(200).json({ success: true, message: "You've left the community"})
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to exit community"})
+  }
+}
