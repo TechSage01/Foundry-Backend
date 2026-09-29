@@ -61,7 +61,7 @@ export const createCommunity = async (req: Request, res: Response) => {
 
     await client.query('COMMIT')
 
-    return res.status(200).json({ success: true, message: "Community Created", data: communityRes.rows[0] })
+    return res.status(201).json({ success: true, message: "Community Created", data: communityRes.rows[0] })
   } catch (error) {
     await client.query('ROLLBACK')
     console.error(error)
@@ -158,5 +158,42 @@ export const fetchCommunities = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch communities" })
+  }
+}
+
+// @route GET /api/communities/:slug
+// @desc Get a community by slug
+// @access Public
+export const getCommunity = async (req: Request, res: Response) => {
+  const { slug } = req.params as { slug: string };
+
+  if (!slug || slug == "") {
+    return res.status(400).json({ success: false, message: "Slug is required" })
+  }
+
+  const normalizedSlug = slug.trim().toLowerCase();
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        id,
+        name,
+        description,
+        category,
+        slug,
+        icon_url,
+        created_at
+      FROM communities
+      WHERE slug = $1
+    `, [normalizedSlug])
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Community Not Found" })
+    }
+
+    return res.status(200).json({ success: true, data: rows[0] })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to get community" })
   }
 }
