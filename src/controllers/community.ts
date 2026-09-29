@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { createCommunitySchema } from "../schemas/community.js";
 import { uploadFile } from "../config/imagekit.js";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 import { slugify } from "../utils/helpers.js";
 
@@ -195,5 +195,47 @@ export const getCommunity = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to get community" })
+  }
+}
+
+// @route POST /api/communities/:id/join
+// @desc Join a community
+// @access Authenticated users
+export const joinCommunity = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Community Id" })
+  }
+
+  try {
+    // check
+    const check = await pool.query(`
+      SELECT id FROM communities WHERE id = $1
+    `, [id])
+
+    if (check.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Community Not Found" })
+    }
+
+    const { rowCount } = await pool.query(`
+      INSERT INTO community_members (
+        community_id, user_id, role
+      ) VALUES ($1, $2, 'member')
+      ON CONFLICT (community_id, user_id) DO NOTHING
+    `, [id, userId])
+
+    if (rowCount === 0) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "You are already a member of this community"
+      })
+    }
+
+    return res.status(201).json({ success: true, message: "Successfully joined the community"})
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to join community" })
   }
 }
