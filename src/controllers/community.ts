@@ -47,7 +47,7 @@ export const createCommunity = async (req: Request, res: Response) => {
       userId, 
       name.trim(), 
       slug.trim().toLowerCase(), 
-      category.trim(), 
+      category.trim().toLowerCase(), 
       description.trim(), 
       iconUrl ?? null
     ])
@@ -66,5 +66,97 @@ export const createCommunity = async (req: Request, res: Response) => {
     await client.query('ROLLBACK')
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create community" })
+  }
+}
+
+// @route GET /api/communities
+// @desc Fetch all communities
+// @access Public
+export const fetchCommunities = async (req: Request, res: Response) => {
+  const requestingUserId = req.user?.id || null;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+
+  const category = (req.query.category as string)?.trim();
+  const search = (req.query.search as string)?.trim().toLowerCase();
+
+  try {
+    const whereConditions: string[] = [];
+    const params: (string | number)[] = [];
+
+    if (category && category.toLowerCase() != "all") {
+      params.push(category)
+      whereConditions.push(`LOWER(category) = LOWER($${params.length})`);
+    }
+
+    if (search) {
+      params.push(`%${search}%`)
+      whereConditions.push(
+        `(LOWER(c.name) LIKE $${params.length} OR LOWER(c.description) LIKE $${params.length})`
+      );
+    }
+
+    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(" AND ")}` : "";
+
+    const countQuery = `
+      SELECT COUNT(*)::INTEGER AS total
+      FROM communities c
+      ${whereClause}
+    `;
+
+    const limitParamIdx = params.length + 1;
+    const offsetParamIdx = params.length + 2;
+    const userIdParamIdx = params.length + 3;
+
+    const dataQuery = `
+      SELECT
+        c.id,
+        c.name,
+        c.slug,
+        c.category,
+        c.description,
+        c.icon_url,
+        c.created_at,
+        COUNT(DISTINCT cm.user_id)::INTEGER AS builders_count,
+        CASE 
+          WHEN $${userIdParamIdx}::UUID IS NULL THEN false
+          ELSE EXISTS (
+            SELECT 1 
+            FROM community_members 
+            WHERE community_id = c.id AND user_id = $${userIdParamIdx}::UUID
+          )
+        END AS is_joined
+      FROM communities c
+      LEFT JOIN community_members cm ON cm.community_id = c.id
+      ${whereClause}
+      GROUP BY c.id
+      ORDER BY builders_count DESC, c.created_at DESC
+      LIMIT $${limitParamIdx} OFFSET $${offsetParamIdx}
+    `;
+
+    const queryParams = [...params, limit, offset, requestingUserId];
+
+    const [countResult, communityResult] = await Promise.all([
+      pool.query(countQuery, params),
+      pool.query(dataQuery, queryParams),
+    ]);
+
+    const total = countResult.rows[0]?.total ?? 0;
+
+    return res.status(200).json({
+      success: true,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+      data: communityResult.rows 
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch communities" })
   }
 }

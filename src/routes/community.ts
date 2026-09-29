@@ -1,9 +1,12 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.js";
-import { createCommunity } from "../controllers/community.js";
+import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
+import { createCommunity, fetchCommunities } from "../controllers/community.js";
 import { upload } from "../middlewares/upload.js";
 
 const router = Router();
+
+// Public
+router.get("/", optionalAuthMiddleware, fetchCommunities)
 
 // Authenticated
 router.post("/", authMiddleware, upload.single("icon"), createCommunity)

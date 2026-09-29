@@ -89,6 +89,13 @@
 | `PUT`    | `/api/opportunities/{id}`          | Update an opportunity                            |
 | `DELETE` | `/api/opportunities/{id}`          | Delete an opportunity                            |
 
+### communities
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/communities`                 | Create a new community                           |
+| `GET`    | `/api/communities`                 | Fetch all communities                            |
+
 <br><br>
 
 ## Docs
@@ -339,6 +346,24 @@ Fetches a paginated list of opportunities with optional filtering.
 | :--- | :--- | :--- | :--- | :--- |
 | `page` | `integer` | No | `1` | Page number for pagination |
 | `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+
+<br>
+
+---
+
+**`GET /api/communities`**
+
+Fetches a paginated list of communities with optional filtering.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `12` | Number of items per page (max 50) |
+| `category` | `string` | No | `null` | Filter communities by category (e.g., `ai`) |
+| `search` | `string` | No | `null` | Filter communities by name or description (e.g., `golang devs`) |
+
 
 
 
