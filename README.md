@@ -95,6 +95,7 @@
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/communities`                 | Create a new community                           |
 | `GET`    | `/api/communities`                 | Fetch all communities                            |
+| `GET`    | `/api/communities/me`              | Get all owned communities by a user              |
 | `GET`    | `/api/communities/{slug}`          | Get a single community by slug                   |
 | `POST`   | `/api/communities/{id}/join`       | Join a community                                 |
 | `POST`   | `/api/communities/{id}/leave`      | Leave a community                                |
