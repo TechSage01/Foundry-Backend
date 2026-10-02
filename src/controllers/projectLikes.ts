@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 
-// @route POST /api/projects/{id}/likes
+// @route POST /api/projects/:id/likes
 // @desc toggle project like status
 // @access Authenticated users only
 export const toggleProjectLike = async (req: Request, res: Response) => {
@@ -76,7 +76,7 @@ export const toggleProjectLike = async (req: Request, res: Response) => {
   }
 }
 
-// @route GET /api/projects/{id}/likes
+// @route GET /api/projects/:id/likes
 // @desc get likes count from projects
 // @access Public
 export const getProjectLikes = async (req: Request, res: Response) => {

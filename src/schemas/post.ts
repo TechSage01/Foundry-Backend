@@ -6,7 +6,7 @@ export const createPostSchema = z.object({
   content: z.string().min(10, "Content must be at least 10 chars"),
   cover_image_url: z.string().url("Invalid Image Url").optional().nullable(),
   tags: z.array(z.string()).optional().default([]),
-  is_published: z.boolean().optional().default(false)
+  is_published: z.boolean().optional().default(true)
 });
 
 export const updatePostSchema = createPostSchema

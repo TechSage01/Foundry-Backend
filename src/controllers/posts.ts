@@ -171,6 +171,10 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
        ORDER BY p.created_at DESC`
     );
 
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Posts Not Found" })
+    }
+
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
@@ -225,6 +229,80 @@ export const getPost = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, data: rows[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get post" })
+  }
+}
+
+// @route POST /api/posts/:id/likes
+// @desc toggle post like
+// @access Authenticated users
+export const togglePostLike = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Post Id" })
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN')
+
+    // verify project existence
+    const projectCheck = await client.query(`
+      SELECT id FROM posts WHERE id = $1
+    `, [id])
+
+    if (projectCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post Not Found" })
+    }
+
+    // check if user has liked
+    const likedCheck = await client.query(`
+      SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2
+    `, [id, userId])
+
+    let isLiked = false;
+
+    if (likedCheck.rows.length > 0) {
+      // delete like
+
+      await client.query(`
+        DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2
+      `, [id, userId])
+
+      isLiked = false;
+    } else {
+      // create like
+
+      await client.query(`
+        INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)
+      `, [id, userId])
+
+      isLiked = true
+    }
+
+    // get likes count
+    const countRes = await client.query(`
+      SELECT COUNT(*)::INTEGER as likes_count FROM post_likes WHERE post_id = $1
+    `, [id])
+
+    await client.query('COMMIT')
+
+    return res.status(200).json({ 
+      success: true, 
+      message: isLiked ? "Post liked" : "Post unliked",
+      data: {
+        is_liked: isLiked,
+        likes_count: countRes.rows[0].likes_count
+      }
+    })
+  } catch (error) {
+    await client.query('ROLLBACK')
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to toggle project likes" })
+  } finally {
+    await client.release()
   }
 }
 
