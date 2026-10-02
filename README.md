@@ -67,6 +67,7 @@
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
+| `POST`   | `/api/posts/{id}/likes`            | Toggle like status for a post                    |
 
 
 ### follows
