@@ -9,6 +9,11 @@ export const createPostSchema = z.object({
   is_published: z.boolean().optional().default(true)
 });
 
+export const createCommentSchema = z.object({
+  parent_id: z.string().optional().nullable(),
+  content: z.string().min(1, "Content must be at least 1 chars")
+})
+
 export const updatePostSchema = createPostSchema
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
