@@ -90,7 +90,9 @@ export const getMyPosts = async (req: Request, res: Response) => {
          tags,
          is_published,
          views_count, 
-         created_at
+         created_at,
+         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = id),
+         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = id)
        FROM posts 
        WHERE user_id = $1 AND is_published = true
        ORDER BY created_at DESC 
@@ -164,7 +166,9 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
          p.created_at,
          prof.username,
          prof.full_name,
-         prof.avatar_url
+         prof.avatar_url,
+         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = p.id),
+         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = p.id)
        FROM posts p
        JOIN profiles prof ON p.user_id = prof.user_id
        WHERE p.is_published = true
@@ -212,6 +216,8 @@ export const getPost = async (req: Request, res: Response) => {
          up.views_count,
          up.created_at,
          up.updated_at,
+         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = up.id),
+         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = up.id),
          prof.username,
          prof.full_name,
          prof.avatar_url,
