@@ -201,7 +201,6 @@ export const getPost = async (req: Request, res: Response) => {
        )
        SELECT 
          up.id,
-         up.user_id,
          up.title,
          up.slug,
          up.subtitle,
