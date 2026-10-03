@@ -71,6 +71,12 @@
 | `POST`   | `/api/posts/{id}/repost`           | Repost a post                                    |
 | `DELETE` | `/api/posts/{id}/repost`           | Delete a repost                                  |
 
+### post comments
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/posts/{id}/comments`         | Create a comment                                 |
+| `GET`    | `/api/posts/{id}/comments`         | Fetch post comments                              |
 
 ### follows
 
@@ -370,6 +376,23 @@ Fetches a paginated list of communities with optional filtering.
 | `limit` | `integer` | No | `12` | Number of items per page (max 50) |
 | `category` | `string` | No | `null` | Filter communities by category (e.g., `ai`) |
 | `search` | `string` | No | `null` | Filter communities by name or description (e.g., `golang devs`) |
+
+<br>
+
+---
+
+**`POST /api/posts/{id}/comments`**
+
+Create a new comment.
+
+**Request Body**
+
+```json
+{
+  "parent_id": "string | null <parent comment id>",
+  "content": "string"
+}
+```
 
 
 
