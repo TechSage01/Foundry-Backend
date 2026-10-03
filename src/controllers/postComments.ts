@@ -55,3 +55,31 @@ export const createComment = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to create comment "})
   }
 }
+
+// @route GET /api/posts/:id/comments
+// @desc fetch posts comments
+// @access Public
+export const fetchComments = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Post Id" })
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        id,
+        parent_id,
+        content
+      FROM comments
+      WHERE post_id = $1
+      ORDER BY created_at DESC
+    `, [id])
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch posts" })
+  }
+}
