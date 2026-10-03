@@ -90,7 +90,9 @@ export const getMyPosts = async (req: Request, res: Response) => {
          tags,
          is_published,
          views_count, 
-         created_at
+         created_at,
+         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = id),
+         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = id)
        FROM posts 
        WHERE user_id = $1 AND is_published = true
        ORDER BY created_at DESC 
