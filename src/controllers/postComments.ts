@@ -35,16 +35,29 @@ export const createComment = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Post Not Found" })
     }
 
+    // get author details
+    const author = await pool.query(`
+      SELECT full_name, username, avatar_url FROM profiles WHERE user_id = $1
+    `, [userId])
+
+    if (author.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get author profile" })
+    }
+
     const commentId = uuidv4();
+    const user = author.rows[0];
 
     await pool.query(`
       INSERT INTO comments (
-        id, post_id, author_id, parent_id, content
-      ) VALUES ($1, $2, $3, $4, $5)
+        id, post_id, author_id, author_fullname, author_username, author_avatar_url, parent_id, content
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
     `, [
       commentId,
       id,
       userId,
+      user.full_name,
+      user.username,
+      user.avatar_url,
       parent_id ?? null,
       content
     ])
@@ -60,7 +73,7 @@ export const createComment = async (req: Request, res: Response) => {
 // @desc fetch posts comments
 // @access Public
 export const fetchComments = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const { id } = req.params; 
   
   if (!id || !isUuid(id)) {
     return res.status(400).json({ success: false, message: "Invalid Post Id" })
@@ -71,6 +84,9 @@ export const fetchComments = async (req: Request, res: Response) => {
       SELECT
         id,
         parent_id,
+        author_fullname,
+        author_username,
+        author_avatar_url,
         content
       FROM comments
       WHERE post_id = $1
