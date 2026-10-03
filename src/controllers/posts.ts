@@ -308,7 +308,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
 // @route POST /api/posts/:id/repost
 // @desc Repost a post
 // @access Authenticated users
-export const repostPost = async (req: Request, res: Response) => {
+export const createRepost = async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.id;
 
@@ -316,13 +316,9 @@ export const repostPost = async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: "Invalid Post Id" })
   }
 
-  const client = await pool.connect();
-
   try {
-    await client.query('BEGIN')
-
     // verify post existence
-    const postCheck = await client.query(`
+    const postCheck = await pool.query(`
       SELECT id FROM posts WHERE id = $1
     `, [id])
 
@@ -330,48 +326,73 @@ export const repostPost = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Post Not Found" })
     }
 
-    const repostCheck = await client.query(`
+    const repostCheck = await pool.query(`
       SELECT 1 FROM post_reposts WHERE post_id = $1 AND user_id = $2
     `, [id, userId]);
 
-    let isReposted = false;
-
     if (repostCheck.rows.length > 0) {
-      // undo repost
-
-      await client.query(`
-        DELETE FROM post_reposts WHERE post_id = $1 AND user_id = $2
-      `, [id, userId])
-
-      isReposted = false;
-    } else {
-      // do repost
-
-      await client.query(`
-        INSERT INTO post_reposts (post_id, user_id) VALUES ($1, $2)
-      `, [id, userId])
-
-      isReposted = true;
+      return res.status(200).json({ success: true, message: "Post Reposted"})
     }
 
-    await client.query('COMMIT')
+    // create post
+    await pool.query(`
+      INSERT INTO post_reposts (post_id, user_id) VALUES ($1, $2)
+    `, [id, userId])
 
-    return res.status(200).json({ 
+    return res.status(201).json({ 
       success: true, 
-      message: isReposted ? "Post Reposted" : "Respost removed" 
+      message: "Post Reposted"
     })
   } catch (error) {
-    await client.query('ROLLBACK');
     console.error(error);
-
     return res.status(500).json({ success: false, message: "Failed to repost" })
-  } finally {
-    await client.release();
+  } 
+}
+
+// @route DELETE /api/posts/:id/repost
+// @desc Delete Repost
+// @access Authenticated users
+export const deleteRepost = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Post Id" })
+  }
+
+  try {
+    // verify post existence
+    const postCheck = await pool.query(`
+      SELECT id FROM posts WHERE id = $1
+    `, [id])
+
+    if (postCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post Not Found" })
+    }
+
+    // check post repost
+    const repostCheck = await pool.query(`
+      SELECT 1 FROM post_reposts WHERE post_id = $1 AND user_id = $2 
+    `, [id, userId])
+
+    if (repostCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Repost Not Found" })
+    }
+
+    // delete repost
+    await pool.query(`
+      DELETE FROM post_reposts WHERE post_id = $1 AND user_id = $2
+    `, [id, userId])
+
+    return res.status(200).json({ success: true, message: "Repost removed" })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to delete repost" })
   }
 }
 
 // @route PUT /api/posts/:id
-// @desc update a postq
+// @desc update a post
 // @access Authenticated users
 export const updatePost = async (req: Request, res: Response) => {
   const { id } = req.params;

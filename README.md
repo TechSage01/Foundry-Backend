@@ -69,6 +69,7 @@
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
 | `POST`   | `/api/posts/{id}/likes`            | Toggle like status for a post                    |
 | `POST`   | `/api/posts/{id}/repost`           | Repost a post                                    |
+| `DELETE` | `/api/posts/{id}/repost`           | Delete a repost                                  |
 
 
 ### follows
