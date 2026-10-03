@@ -214,6 +214,8 @@ export const getPost = async (req: Request, res: Response) => {
          up.views_count,
          up.created_at,
          up.updated_at,
+         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = up.id),
+         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = up.id),
          prof.username,
          prof.full_name,
          prof.avatar_url,
