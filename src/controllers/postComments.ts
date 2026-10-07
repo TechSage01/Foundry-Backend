@@ -99,3 +99,56 @@ export const fetchComments = async (req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
   }
 }
+
+// @route DELETE /api/posts/:id/comments/:commentId
+// @desc delete post
+// @access Authenticated users
+export const deleteComment = async (req: Request, res: Response) => {
+  const { id, commentId } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Post Id" })
+  }
+
+  try {
+    // verify post existence
+    const postCheck = await pool.query(`
+      SELECT id FROM posts WHERE id = $1
+    `, [id])
+
+    if (postCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post Not Found" })
+    }
+
+    // verify comment existence
+    const commentCheck = await pool.query(`
+      SELECT * FROM comments WHERE id = $1
+    `, [commentId])
+
+    if (commentCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Comment Not Found" })
+    }
+
+    const comment = commentCheck.rows[0];
+
+    console.log(userId)
+    console.log(comment.author_id)
+
+    // permission check
+    if (comment.author_id !== userId) {
+      return res.status(401).json({ success: false, message: "You have no permission to delete this comment" })
+    }
+
+    await pool.query(`
+      DELETE 
+      FROM comments
+      WHERE id = $1
+    `, [commentId])
+
+    return res.status(200).json({ success: true, message: "Comment Deleted"})
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to delete comment" })
+  }
+}
