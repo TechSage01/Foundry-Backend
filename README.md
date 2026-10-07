@@ -114,6 +114,7 @@
 | Method   | Endpoint                           | Description                                      |
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/communities/{id}/post`       | Create a new communuty post                      |
+| `GET`    | `/api/communities/{id}/posts`      | Fetch all posts in a community                   |
 
 <br><br>
 
@@ -432,6 +433,22 @@ Creates a new post in a community.
 | `title`          | string        | Yes      | Post's title                                       |
 | `subtitle`       | string        | No       | Post's subtitle.                                   |
 | `content`        | string        | Yes      | Post's content.                                    |
+
+<br>
+
+---
+
+**`GET /api/communities/:id/posts`**
+
+Fetches a paginated list of community posts.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `12` | Number of items per page (max 50) |
+
 
 
 

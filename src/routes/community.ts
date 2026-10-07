@@ -3,12 +3,13 @@ import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
 import { createCommunity, fetchCommunities, getCommunity, getMyCommunities, joinCommunity, leaveCommunity } from "../controllers/community.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
-import { createCommunityPost } from "../controllers/communityPosts.js";
+import { createCommunityPost, fetchCommunityPosts } from "../controllers/communityPosts.js";
 
 const router = Router();
 
 // Public
 router.get("/", optionalAuthMiddleware, fetchCommunities)
+router.get("/:id/posts", fetchCommunityPosts)
 router.get("/me", authMiddleware, getMyCommunities)
 router.get("/:slug", getCommunity)
 
