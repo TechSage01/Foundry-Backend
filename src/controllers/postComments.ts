@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { v4 as uuidv4, validate as isUuid } from "uuid"
 import pool from "../config/db.js";
 import { createCommentSchema } from "../schemas/post.js";
+import { buildCommentTree } from "../utils/helpers.js";
 
 // @route POST /api/posts/:id/comments
 // @desc  create a post comment
@@ -93,7 +94,9 @@ export const fetchComments = async (req: Request, res: Response) => {
       ORDER BY created_at DESC
     `, [id])
 
-    return res.status(200).json({ success: true, data: rows })
+    const nestedComments = buildCommentTree(rows);
+
+    return res.status(200).json({ success: true, data: nestedComments })
   } catch (error) {
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
@@ -131,9 +134,6 @@ export const deleteComment = async (req: Request, res: Response) => {
     }
 
     const comment = commentCheck.rows[0];
-
-    console.log(userId)
-    console.log(comment.author_id)
 
     // permission check
     if (comment.author_id !== userId) {
