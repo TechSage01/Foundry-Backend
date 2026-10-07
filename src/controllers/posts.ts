@@ -32,7 +32,7 @@ export const createPost = async (req: Request, res: Response) => {
   const { title, subtitle, content, tags, is_published } = validation.data;
 
   try {
-    let coverImageUrl: string | null = validation.data.cover_image_url ?? null;
+    let coverImageUrl: string | null = null;
     if (req.file) {
       coverImageUrl = await uploadFile(
         req.file.buffer,
@@ -475,7 +475,7 @@ export const updatePost = async (req: Request, res: Response) => {
       });
     }
 
-    let coverImageUrl: string | null = validation.data.cover_image_url ?? null;
+    let coverImageUrl: string | null = null;
 
     if (req.file) {
       coverImageUrl = await uploadFile(

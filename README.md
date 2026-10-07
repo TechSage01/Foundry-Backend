@@ -109,6 +109,12 @@
 | `POST`   | `/api/communities/{id}/join`       | Join a community                                 |
 | `POST`   | `/api/communities/{id}/leave`      | Leave a community                                |
 
+### community posts
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/communities/{id}/post`       | Create a new communuty post                      |
+
 <br><br>
 
 ## Docs
@@ -304,6 +310,23 @@ Updates a post for the authenticated user.
 
 ---
 
+**`POST /api/posts/{id}/comments`**
+
+Create a new comment.
+
+**Request Body**
+
+```json
+{
+  "parent_id": "string | null <parent comment id>",
+  "content": "string"
+}
+```
+
+<br>
+
+---
+
 **`POST /api/opportunities`**
 
 Create a new opportunity.
@@ -364,6 +387,23 @@ Fetches a paginated list of opportunities with optional filtering.
 
 ---
 
+**`POST /api/communities`**
+
+Create a new community
+
+**Request Body**
+
+```json
+{
+  "title": "string",
+  "description": "string",
+  "category": "string"
+}
+```
+<br>
+
+---
+
 **`GET /api/communities`**
 
 Fetches a paginated list of communities with optional filtering.
@@ -381,19 +421,17 @@ Fetches a paginated list of communities with optional filtering.
 
 ---
 
-**`POST /api/posts/{id}/comments`**
+**`POST /api/communities/:id/post`**
 
-Create a new comment.
+Creates a new post in a community.
 
-**Request Body**
+**Request Body (`multipart/form-data`)**
 
-```json
-{
-  "parent_id": "string | null <parent comment id>",
-  "content": "string"
-}
-```
-
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `title`          | string        | Yes      | Post's title                                       |
+| `subtitle`       | string        | No       | Post's subtitle.                                   |
+| `content`        | string        | Yes      | Post's content.                                    |
 
 
 
