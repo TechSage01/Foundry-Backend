@@ -152,6 +152,8 @@ export const getMyDrafts = async (req: Request, res: Response) => {
 // @desc get all published posts
 // @access Public
 export const getPublishedPosts = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
   try {
     const { rows } = await pool.query(
       `SELECT 
@@ -167,13 +169,20 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
          prof.username,
          prof.full_name,
          prof.avatar_url,
-         (SELECT COUNT(*)::INTEGER as likes FROM post_likes WHERE post_id = p.id),
-         (SELECT COUNT(*)::INTEGER as repost_count FROM post_reposts WHERE post_id = p.id)
+         (SELECT COUNT(*)::INTEGER as likes_count FROM post_likes WHERE post_id = p.id),
+         (SELECT COUNT(*)::INTEGER as reposts_count FROM post_reposts WHERE post_id = p.id),
+         (SELECT COUNT(*)::INTEGER as comments_count FROM comments WHERE post_id = p.id),
+         EXISTS (
+          SELECT FROM post_reposts WHERE post_id = p.id AND user_id = $1
+         ) AS is_reposted,
+         EXISTS (
+          SELECT FROM post_likes WHERE post_id = p.id AND user_id = $1
+         ) AS is_liked
        FROM posts p
        JOIN profiles prof ON p.user_id = prof.user_id
        WHERE p.is_published = true
        ORDER BY p.created_at DESC`
-    );
+    , [userId ?? null]);
 
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "Posts Not Found" })

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.js";
+import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
 import { createPost, createRepost, deletePost, deleteRepost, getMyDrafts, getMyPosts, getPost, getPublishedPosts, togglePostLike, updatePost } from "../controllers/posts.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
@@ -12,7 +12,7 @@ router.get("/me", authMiddleware, getMyPosts)
 router.get("/me/drafts", authMiddleware, getMyDrafts)
 
 // Public
-router.get("/", getPublishedPosts)
+router.get("/", optionalAuthMiddleware, getPublishedPosts)
 router.get("/:slug", getPost)
 router.get("/:id/comments", fetchComments)
 
