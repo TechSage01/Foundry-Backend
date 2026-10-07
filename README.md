@@ -78,6 +78,14 @@
 | `POST`   | `/api/posts/{id}/comments`         | Create a comment                                 |
 | `GET`    | `/api/posts/{id}/comments`         | Fetch post comments                              |
 
+### post bookmarks
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/posts/{id}/bookmarks`        | Bookmark a post                                  |
+| `GET`    | `/api/posts/me/bookmarks`          | Fetch all post bookmarked by the user            |
+| `DELETE` | `/api/posts/{id}/bookmarks`        | Remove a bookmark post                           |
+
 ### follows
 
 | Method   | Endpoint                           | Description                                      |
