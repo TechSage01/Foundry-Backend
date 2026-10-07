@@ -247,6 +247,56 @@ export const getPost = async (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/posts/me/reposts
+// @desc fetch all reposts by the user
+// @access Authenticated users
+export const fetchMyReposts = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT 
+         p.id,
+         p.title,
+         p.slug,
+         p.subtitle,
+         p.content,
+         p.cover_image_url,
+         p.tags,
+         p.reading_time_minutes,
+         p.views_count,
+         p.created_at,
+         prof.username,
+         prof.full_name,
+         prof.avatar_url,
+         (SELECT COUNT(*)::INTEGER as likes_count FROM post_likes WHERE post_id = p.id),
+         (SELECT COUNT(*)::INTEGER as reposts_count FROM post_reposts WHERE post_id = p.id),
+         (SELECT COUNT(*)::INTEGER as comments_count FROM comments WHERE post_id = p.id),
+         EXISTS (
+          SELECT FROM post_reposts WHERE post_id = p.id AND user_id = $1
+         ) AS is_reposted,
+         EXISTS (
+          SELECT FROM post_likes WHERE post_id = p.id AND user_id = $1
+         ) AS is_liked
+      FROM posts p
+      INNER JOIN post_reposts pr ON p.id = pr.post_id
+      INNER JOIN profiles prof ON pr.user_id = prof.user_id
+      WHERE pr.user_id = $1
+      ORDER BY created_at DESC
+      LIMIT $2 OFFSET $3
+    `, [userId, limit, offset])
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch posts" })
+  }
+}
+
 // @route POST /api/posts/:id/likes
 // @desc toggle post like
 // @access Authenticated users

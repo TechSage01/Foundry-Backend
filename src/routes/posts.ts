@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
-import { createPost, createRepost, deletePost, deleteRepost, getMyDrafts, getMyPosts, getPost, getPublishedPosts, togglePostLike, updatePost } from "../controllers/posts.js";
+import { createPost, createRepost, deletePost, deleteRepost, fetchMyReposts, getMyDrafts, getMyPosts, getPost, getPublishedPosts, togglePostLike, updatePost } from "../controllers/posts.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { createComment, fetchComments } from "../controllers/postComments.js";
@@ -12,6 +12,7 @@ const router = Router();
 router.get("/me", authMiddleware, getMyPosts)
 router.get("/me/drafts", authMiddleware, getMyDrafts)
 router.get("/me/bookmarks", authMiddleware, getMyBookmarks)
+router.get("/me/reposts", authMiddleware, fetchMyReposts)
 
 // Public
 router.get("/", optionalAuthMiddleware, getPublishedPosts)
