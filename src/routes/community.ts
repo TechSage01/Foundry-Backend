@@ -9,9 +9,9 @@ const router = Router();
 
 // Public
 router.get("/", optionalAuthMiddleware, fetchCommunities)
+router.get("/:slug", getCommunity)
 router.get("/:id/posts", fetchCommunityPosts)
 router.get("/me", authMiddleware, getMyCommunities)
-router.get("/:slug", getCommunity)
 
 // Authenticated
 router.post("/", authMiddleware, uploadLimiter, upload.single("icon"), createCommunity)

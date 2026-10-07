@@ -19,10 +19,21 @@ CREATE TABLE IF NOT EXISTS post_reposts (
   FOREIGN KEY(post_id) REFERENCES posts(id) ON DELETE CASCADE,
   FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS post_bookmarks (
+  post_id UUID NOT NULL,
+  user_id UUID NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  PRIMARY KEY (post_id, user_id),
+  FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE IF EXISTS post_likes;
 DROP TABLE IF EXISTS post_reposts;
+DROP TABLE IF EXISTS post_bookmarks;
 -- +goose StatementEnd

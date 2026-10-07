@@ -4,12 +4,14 @@ import { createPost, createRepost, deletePost, deleteRepost, getMyDrafts, getMyP
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { createComment, fetchComments } from "../controllers/postComments.js";
+import { createPostBookmark, deletePostBookmark, getMyBookmarks } from "../controllers/postBookmarks.js";
 
 const router = Router();
 
 // Authenticated
 router.get("/me", authMiddleware, getMyPosts)
 router.get("/me/drafts", authMiddleware, getMyDrafts)
+router.get("/me/bookmarks", authMiddleware, getMyBookmarks)
 
 // Public
 router.get("/", optionalAuthMiddleware, getPublishedPosts)
@@ -30,5 +32,9 @@ router.delete("/:id/repost", authMiddleware, deleteRepost)
 
 // comments
 router.post("/:id/comments", authMiddleware, createComment)
+
+// bookmarks
+router.post("/:id/bookmarks", authMiddleware, createPostBookmark)
+router.delete("/:id/bookmarks", authMiddleware, deletePostBookmark)
 
 export default router;
