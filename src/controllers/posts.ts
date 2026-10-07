@@ -161,6 +161,7 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
          p.title,
          p.slug,
          p.subtitle,
+         p.content,
          p.cover_image_url,
          p.tags,
          p.reading_time_minutes,
