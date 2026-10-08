@@ -115,6 +115,7 @@
 | `GET`    | `/api/communities`                 | Fetch all communities                            |
 | `GET`    | `/api/communities/me`              | Get all owned communities by a user              |
 | `GET`    | `/api/communities/{slug}`          | Get a single community by slug                   |
+| `GET`    | `/api/communities/{slug}/members`  | Fetch all members from a community               |
 | `POST`   | `/api/communities/{id}/join`       | Join a community                                 |
 | `POST`   | `/api/communities/{id}/leave`      | Leave a community                                |
 

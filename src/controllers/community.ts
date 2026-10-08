@@ -236,6 +236,37 @@ export const getCommunity = async (req: Request, res: Response) => {
   }
 }
 
+// @route GET /api/communities/:slug/members
+// @desc Fetch community members
+// @access Public
+export const fetchCommunityMembers = async (req: Request, res: Response) => {
+  const { slug } = req.params;
+
+  if (!slug || slug === "") {
+    return res.status(400).json({ success: false, message: "Slug is required" })
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        p.username,
+        p.full_name,
+        p.avatar_url,
+        cm.role
+      FROM communities c
+      INNER JOIN community_members cm ON c.id = cm.community_id
+      INNER JOIN profiles p ON cm.user_id = p.user_id
+      WHERE c.slug = $1
+      ORDER BY cm.joined_at DESC
+    `, [slug])
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch community members" })
+  }
+}
+
 // @route POST /api/communities/:id/join
 // @desc Join a community
 // @access Authenticated users
