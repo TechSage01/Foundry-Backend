@@ -183,14 +183,9 @@ export const getMyCommunities = async (req: Request, res: Response) => {
           WHERE community_id = c.id
         ) as members
       FROM communities c
-      JOIN community_members cm ON c.id = cm.community_id
       WHERE c.owner_id = $1
-      ORDER BY cm.joined_at DESC
+      ORDER BY c.created_at DESC
     `, [userId])
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Communities Not Found" })
-    }
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
