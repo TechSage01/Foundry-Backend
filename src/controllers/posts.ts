@@ -367,7 +367,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to toggle project likes" })
   } finally {
-    await client.release()
+    client.release()
   }
 }
 

@@ -72,7 +72,7 @@ export const toggleProjectLike = async (req: Request, res: Response) => {
     await client.query("ROLLBACK")
     return res.status(500).json({ success: false, message: "Failed to toggle project like", error })
   } finally {
-    await client.release();
+    client.release();
   }
 }
 

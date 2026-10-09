@@ -66,6 +66,8 @@ export const createCommunity = async (req: Request, res: Response) => {
     await client.query('ROLLBACK')
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create community" })
+  } finally {
+    client.release();
   }
 }
 
