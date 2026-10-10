@@ -71,6 +71,7 @@
 | `GET`    | `/api/posts/me`                    | Fetch all owned posts for a user                 |
 | `GET`    | `/api/posts/me/drafts`             | Fetch all owned posts drafts for a user          |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
+| `GET`    | `/api/posts/user/{username}`       | Fetch all posts associated with a username       |
 | `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
 | `POST`   | `/api/posts/{id}/likes`            | Toggle like status for a post                    |

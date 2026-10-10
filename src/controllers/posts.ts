@@ -146,6 +146,8 @@ export const getMyDrafts = async (req: Request, res: Response) => {
 export const getPublishedPosts = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+
   try {
     const { rows } = await pool.query(
       `SELECT 
@@ -174,12 +176,76 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
        FROM posts p
        JOIN profiles prof ON p.user_id = prof.user_id
        WHERE p.is_published = true
-       ORDER BY p.created_at DESC`
-    , [userId ?? null]);
+       ORDER BY p.created_at DESC
+       LIMIT $2`
+    , [
+      userId ?? null,
+      limit
+    ]);
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
+  }
+}
+
+// @route GET /api/posts/user/:username
+// @desc fetch all posts associated with a username
+// @access Public
+export const getUserPosts = async (req: Request, res: Response) => {
+  const { username } = req.params;
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Username is required" })
+  }
+
+  try {
+    // verify target user
+    const user = await pool.query(`SELECT user_id FROM profiles WHERE username = $1`, [username])
+
+    if (user.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User Not Found" })
+    }
+
+    const userId = user.rows[0].user_id;
+
+    // fetch posts
+    const { rows } = await pool.query(`
+      SELECT
+        p.id,
+        p.title,
+        p.slug,
+        p.subtitle,
+        p.content,
+        p.cover_image_url,
+        p.tags,
+        p.reading_time_minutes,
+        p.views_count,
+        p.created_at,
+        prof.username,
+        prof.full_name,
+        prof.avatar_url,
+        (SELECT COUNT(*)::INTEGER AS likes_count FROM post_likes WHERE post_id = p.id),
+        (SELECT COUNT(*)::INTEGER AS comments_count FROM comments WHERE post_id = p.id),
+        (SELECT COUNT(*)::INTEGER AS reposts_count FROM post_reposts WHERE post_id = p.id),
+        EXISTS (
+          SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1
+        ) AS is_liked,
+        EXISTS (
+          SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1
+        ) AS is_reposted
+      FROM posts p
+      JOIN profiles prof ON p.user_id = prof.user_id
+      WHERE p.user_id = $1 AND p.is_published = true
+      ORDER BY p.created_at DESC
+      LIMIT $2
+    `, [userId, limit])
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch user posts" })
   }
 }
 
