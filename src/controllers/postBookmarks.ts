@@ -52,6 +52,8 @@ export const createPostBookmark = async (req: Request, res: Response) => {
 export const getMyBookmarks = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
+
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -72,7 +74,8 @@ export const getMyBookmarks = async (req: Request, res: Response) => {
       FROM posts p 
       JOIN post_bookmarks pb ON p.id = pb.post_id AND pb.user_id = $1
       ORDER BY pb.created_at DESC
-    `, [userId])
+      LIMIT $2
+    `, [userId, limit])
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {

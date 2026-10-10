@@ -192,6 +192,7 @@ export const getProject = async (req: Request, res: Response) => {
 // @access Public
 export const getUserProjects = async (req: Request, res: Response) => {
   const { username } = req.params as { username: string};
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
 
   if (!username || username.trim() === "") {
     return res.status(400).json({ success: false, message: "Invalid Username" })
@@ -246,8 +247,9 @@ export const getUserProjects = async (req: Request, res: Response) => {
          ) AS completed_phases
        FROM projects p
        WHERE p.user_id = $1 AND p.is_published = true
-       ORDER BY p.created_at DESC`,
-      [author.user_id]
+       ORDER BY p.created_at DESC
+       LIMIT $2
+      `,[author.user_id, limit]
     );
 
     // remove userId from response

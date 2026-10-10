@@ -169,6 +169,8 @@ export const fetchCommunities = async (req: Request, res: Response) => {
 export const getMyCommunities = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
+  const limit = Math.min(parseInt(req.query.limit as string) || 12, 50);
+
   try {
     const { rows } = await pool.query(`
       SELECT
@@ -187,7 +189,8 @@ export const getMyCommunities = async (req: Request, res: Response) => {
       FROM communities c
       WHERE c.owner_id = $1
       ORDER BY c.created_at DESC
-    `, [userId])
+      LIMIT $2
+    `, [userId, limit])
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
