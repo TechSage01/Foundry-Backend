@@ -88,14 +88,18 @@ export const getFollowers = async (req: Request, res: Response) => {
   }
 
   try {
-    const { rows } = await pool.query(
-      `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
-       FROM profiles prof
-       JOIN follows f ON f.follower_id = prof.user_id
-       JOIN profiles target_prof ON f.following_id = target_prof.user_id
-       WHERE LOWER(target_prof.username) = LOWER($1)
-       ORDER BY prof.created_at DESC`,
-      [username.trim()]
+    const { rows } = await pool.query(`
+      SELECT 
+        prof.username, 
+        prof.full_name, 
+        prof.avatar_url, 
+        prof.headline
+      FROM profiles prof
+      JOIN follows f ON f.follower_id = prof.user_id
+      JOIN profiles target_prof ON f.following_id = target_prof.user_id
+      WHERE LOWER(target_prof.username) = LOWER($1)
+      ORDER BY prof.created_at DESC
+    `,[username.trim()]
     );
 
     return res.status(200).json({ success: true, count: rows.length, data: rows });
@@ -115,15 +119,18 @@ export const getFollowing = async (req: Request, res: Response) => {
   }
 
   try {
-    const { rows } = await pool.query(
-      `SELECT prof.username, prof.full_name, prof.avatar_url, prof.headline
-       FROM profiles prof
-       JOIN follows f ON f.following_id = prof.user_id
-       JOIN profiles target_prof ON f.follower_id = target_prof.user_id
-       WHERE LOWER(target_prof.username) = LOWER($1)
-       ORDER BY prof.created_at DESC`,
-      [username.trim()]
-    );
+    const { rows } = await pool.query(`
+      SELECT 
+        prof.username, 
+        prof.full_name, 
+        prof.avatar_url, 
+        prof.headline
+      FROM profiles prof
+      JOIN follows f ON f.following_id = prof.user_id
+      JOIN profiles target_prof ON f.follower_id = target_prof.user_id
+      WHERE LOWER(target_prof.username) = LOWER($1)
+      ORDER BY prof.created_at DESC
+    `,[username.trim()]);
 
     return res.status(200).json({ success: true, count: rows.length, data: rows });
   } catch (error) {

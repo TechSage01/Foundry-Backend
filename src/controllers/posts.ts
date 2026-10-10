@@ -110,7 +110,7 @@ export const getMyPosts = async (req: Request, res: Response) => {
 // @desc get all owned posts drafts for the authenticated user
 // @access Authenticated users
 export const getMyDrafts = async (req: Request, res: Response) => {
- const userId = req.user?.id;
+  const userId = req.user?.id;
 
   const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
 
@@ -340,7 +340,7 @@ export const fetchMyReposts = async (req: Request, res: Response) => {
       INNER JOIN post_reposts pr ON p.id = pr.post_id
       INNER JOIN profiles prof ON pr.user_id = prof.user_id
       WHERE pr.user_id = $1
-      ORDER BY created_at DESC
+      ORDER BY pr.created_at DESC
       LIMIT $2 OFFSET $3
     `, [userId, limit, offset])
 

@@ -71,7 +71,7 @@ export const getMyBookmarks = async (req: Request, res: Response) => {
         EXISTS (SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1) as is_reposted
       FROM posts p 
       JOIN post_bookmarks pb ON p.id = pb.post_id AND pb.user_id = $1
-      ORDER BY p.created_at DESC
+      ORDER BY pb.created_at DESC
     `, [userId])
 
     return res.status(200).json({ success: true, data: rows })
