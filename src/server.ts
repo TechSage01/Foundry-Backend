@@ -41,7 +41,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // routes
 app.use("/", globalLimiter, appRouter)
 app.use("/api/auth", authRouter)
@@ -52,7 +51,6 @@ app.use("/api/posts", postRouter)
 app.use("/api/users", userRouter)
 app.use("/api/opportunities", opportunitiesRouter)
 app.use("/api/communities", communitiesRouter)
-
 
 const PORT = process.env.PORT || 5000;
 

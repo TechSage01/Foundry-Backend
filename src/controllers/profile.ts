@@ -3,6 +3,49 @@ import { RESERVED_USERNAMES } from "../utils/list.js";
 import pool from "../config/db.js";
 import { updateProfileSchema } from "../schemas/profile.js";
 import { uploadFile } from "../config/imagekit.js";
+import { formatDate } from "../utils/helpers.js";
+
+// @route GET /api/users/:username
+// @desc Fecth a user's profile
+// @access Public
+export const getUserProfile = async (req: Request, res: Response) => {
+  const { username } = req.params;
+
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Username is required" })
+  }
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        username,
+        full_name,
+        headline,
+        bio,
+        avatar_url,
+        cover_image_url,
+        location,
+        skills,
+        external_links,
+        created_at AS joined_at
+      FROM profiles
+      WHERE username = $1
+    `, [username])
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User Not Found" })
+    }
+
+    let { joined_at, ...prof } = rows[0];
+    joined_at = formatDate(joined_at);
+    
+    const profile = { ...prof, joined_at }
+    return res.status(200).json({ success: true, data: profile })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch user" })
+  }
+}
 
 // @route PUT /api/profile
 // @desc Update profile

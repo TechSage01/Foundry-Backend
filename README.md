@@ -17,6 +17,12 @@
 | `PUT`    | `/api/profile`                  | Update profile                |
 
 
+### users
+
+| Method   | Endpoint                        | Description                     |
+| -------- | ------------------------------- | ------------------------------- |
+| `GET`    | `/api/users/{username}`         | Get a user profile              | 
+
 ### projects
 
 | Method   | Endpoint                           | Description                                   |

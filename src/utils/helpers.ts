@@ -47,3 +47,19 @@ export const buildCommentTree = (flatComments: any[]): CommentNode[] => {
 
   return rootComment
 }
+
+export const formatDate = (dateInput: any): string | null => {
+  if (!dateInput) return null;
+
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(date);
+}
