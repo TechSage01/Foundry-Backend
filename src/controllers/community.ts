@@ -211,14 +211,16 @@ export const getCommunity = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(`
       SELECT
-        id,
-        name,
-        description,
-        category,
-        slug,
-        icon_url,
-        created_at
-      FROM communities
+        c.id,
+        c.name,
+        c.description,
+        c.category,
+        c.slug,
+        c.icon_url,
+        c.created_at,
+        (SELECT COUNT(*)::INTEGER AS members_count FROM community_members WHERE community_id = c.id),
+        (SELECT COUNT(*)::INTEGER AS posts_count FROM community_posts WHERE community_id = c.id)
+      FROM communities c
       WHERE slug = $1
     `, [normalizedSlug])
 

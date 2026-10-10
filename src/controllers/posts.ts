@@ -100,10 +100,6 @@ export const getMyPosts = async (req: Request, res: Response) => {
       [userId, limit]
     );
 
-    if (rows.length < 1) {
-      return res.status(404).json({ success: false, message: "Posts Not Found" })
-    }
-
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get posts" })
@@ -137,10 +133,6 @@ export const getMyDrafts = async (req: Request, res: Response) => {
        LIMIT $2`,
       [userId, limit]
     );
-
-    if (rows.length < 1) {
-      return res.status(404).json({ success: false, message: "Drafts Not Found" })
-    }
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
@@ -184,10 +176,6 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
        WHERE p.is_published = true
        ORDER BY p.created_at DESC`
     , [userId ?? null]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Posts Not Found" })
-    }
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {

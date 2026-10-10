@@ -146,7 +146,8 @@ export const getProject = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Project Not Found." })
     }
 
-    const project = projects.rows[0]
+    const { user_id, ...proj } = projects.rows[0];
+    const project = { ...proj };
 
     // 2. get the project phases & likes
     const [likesResult, phaseResult] = await Promise.all([
@@ -248,10 +249,6 @@ export const getUserProjects = async (req: Request, res: Response) => {
        ORDER BY p.created_at DESC`,
       [author.user_id]
     );
-
-    if (rows.length < 1) {
-      return res.status(404).json({ success: false, message: "Projects Not Found" });
-    }
 
     // remove userId from response
     const { user_id, ...authorRes } = author;

@@ -11,7 +11,7 @@ router.get("/:username/followers", getFollowers)
 router.get("/:username/following", getFollowing)
 
 // Authenticated
-router.post("/:id/follow", authMiddleware, followUser)
-router.delete("/:id/follow", authMiddleware, unFollowUser)
+router.post("/:username/follow", authMiddleware, followUser)
+router.delete("/:username/follow", authMiddleware, unFollowUser)
 
 export default router

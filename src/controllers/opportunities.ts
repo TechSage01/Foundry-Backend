@@ -185,10 +185,6 @@ export const getMyOpportunities = async (req: Request, res: Response) => {
       `, [userId, limit, offset])
     ])
 
-    if (opporResult.rows.length === 0) {
-      return res.status(404).json({ success: false, message: "Opportunities Not Found" })
-    }
-
     const total = countResult.rows[0].total ?? 0;
 
     const opportunities: Opportunity[] = opporResult.rows;

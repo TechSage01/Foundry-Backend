@@ -2,25 +2,27 @@ import { Request, Response } from "express";
 import { validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 
-// @route POST /api/users/:id/follow
+// @route POST /api/users/:username/follow
 // @desc follow a user
 // @access Authenticated users only
 export const followUser = async (req: Request, res: Response) => {
   const followerId = req.user?.id;
-  const { id: followingId } = req.params;
+  const { username } = req.params;
 
-  if (!followingId || !isUuid(followingId)) {
-    return res.status(400).json({ success: false, message: "Invalid User Id" })
-  }
-
-  if (followerId === followingId) {
-    return res.status(400).json({ success: false, message: "You cannot follow yourself." })
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Username is required" })
   }
 
   try {
-    const targetCheck = await pool.query(`SELECT id FROM users WHERE id = $1`, [followingId]);
+    const targetCheck = await pool.query(`SELECT user_id FROM profiles WHERE username = $1`, [username]);
     if (targetCheck.rows.length === 0) {
       return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const followingId = targetCheck.rows[0].user_id;
+
+    if (followerId === followingId) {
+      return res.status(400).json({ success: false, message: "You cannot follow yourself." })
     }
 
     const { rowCount } = await pool.query(
@@ -40,18 +42,26 @@ export const followUser = async (req: Request, res: Response) => {
   }
 }
 
-// @route DELETE /api/users/:id/follow
+// @route DELETE /api/users/:username/follow
 // @desc unfollow a user
 // @access Authenticated users only
 export const unFollowUser = async (req: Request, res: Response) => {
   const followerId = req.user?.id;
-  const { id: followingId } = req.params;
+  const { username } = req.params;
 
-  if (!followingId || !isUuid(followingId)) {
-    return res.status(400).json({ success: false, message: "Invalid User Id" });
+  if (!username) {
+    return res.status(400).json({ success: false, message: "Username is required" });
   }
 
   try {
+    const user = await pool.query(`SELECT user_id FROM profiles WHERE username = $1`, [username])
+    
+    if (user.rows.length === 0) {
+      return res.status(400).json({ success: false, message: "User Not Found" });
+    }
+
+    const followingId = user.rows[0].user_id;
+
     const { rowCount } = await pool.query(
       `DELETE FROM follows WHERE follower_id = $1 AND following_id = $2`,
       [followerId, followingId]

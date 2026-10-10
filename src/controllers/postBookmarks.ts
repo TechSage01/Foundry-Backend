@@ -67,8 +67,8 @@ export const getMyBookmarks = async (req: Request, res: Response) => {
         p.created_at,
         (SELECT COUNT(*)::INTEGER as likes_count FROM post_likes WHERE post_id = p.id),
         (SELECT COUNT(*)::INTEGER as reposts_count FROM post_reposts WHERE post_id = p.id),
-        EXISTS (SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as isLiked,
-        EXISTS (SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1) as isReposted
+        EXISTS (SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1) as is_liked,
+        EXISTS (SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1) as is_reposted
       FROM posts p 
       JOIN post_bookmarks pb ON p.id = pb.post_id AND pb.user_id = $1
       ORDER BY p.created_at DESC
