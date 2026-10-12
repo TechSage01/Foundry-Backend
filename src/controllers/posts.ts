@@ -427,7 +427,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
 
     await client.query('COMMIT')
 
-    return res.status(200).json({ 
+    return res.status(isLiked ? 201 : 200).json({ 
       success: true, 
       message: isLiked ? "Post liked" : "Post unliked",
       data: {

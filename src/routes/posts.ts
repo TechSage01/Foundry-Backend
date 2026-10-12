@@ -3,7 +3,7 @@ import { authMiddleware, optionalAuthMiddleware } from "../middlewares/auth.js";
 import { createPost, createRepost, deletePost, deleteRepost, fetchMyReposts, getMyDrafts, getMyPosts, getPost, getPublishedPosts, getUserPosts, togglePostLike, updatePost } from "../controllers/posts.js";
 import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
-import { createComment, deleteComment, fetchComments } from "../controllers/postComments.js";
+import { createComment, deleteComment, fetchComments, toggleCommentLike } from "../controllers/postComments.js";
 import { createPostBookmark, deletePostBookmark, getMyBookmarks } from "../controllers/postBookmarks.js";
 
 const router = Router();
@@ -35,6 +35,7 @@ router.delete("/:id", authMiddleware, deletePost)
 
 // likes
 router.post("/:id/likes", authMiddleware, togglePostLike)
+router.post("/:id/comments/:commentId/likes", authMiddleware, toggleCommentLike)
 
 // reposts
 router.post("/:id/repost", authMiddleware, createRepost)

@@ -3,6 +3,7 @@ import { v4 as uuidv4, validate as isUuid } from "uuid"
 import pool from "../config/db.js";
 import { createCommentSchema } from "../schemas/post.js";
 import { buildCommentTree } from "../utils/helpers.js";
+import { json, success } from "zod";
 
 // @route POST /api/posts/:id/comments
 // @desc  create a post comment
@@ -67,6 +68,99 @@ export const createComment = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create comment "})
+  }
+}
+
+// @route POST /api/posts/:id/comments/:commentId/likes
+// @desc toggle comment like
+// @access Autheticated users
+export const toggleCommentLike = async (req: Request, res: Response) => {
+  const { id, commentId } = req.params;
+  const userId = req.user?.id;
+
+  if (!id || !commentId || !isUuid(id) || !isUuid(commentId)) {
+    return res.status(400).json({ success: false, message: "PostId & CommentId is required" })
+  }
+
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN')
+
+    // verify post existence
+    const postCheck = await client.query(`
+      SELECT id FROM posts WHERE id = $1
+    `, [id])
+
+    if (postCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Post Not Found" })
+    }
+
+    const post = postCheck.rows[0];
+
+    // verify comment existence
+    const commentCheck = await client.query(`
+      SELECT id, post_id FROM comments WHERE id = $1
+    `, [commentId])
+
+    if (commentCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Comment Not Found" })
+    } else if (commentCheck.rows[0].post_id !== post.id) {
+      return res.status(400).json({ success: false, message: "This comment does not belong to this post" })
+    }
+
+    const comment = commentCheck.rows[0];
+
+    // check is commented
+    const likedCheck = await client.query(`
+      SELECT 1 
+      FROM comment_likes 
+      WHERE comment_id = $1 AND user_id = $2
+    `, [comment.id, userId])
+
+    let isLiked = false;
+
+    if (likedCheck.rows.length > 0) {
+      // delete like
+      await client.query(`
+        DELETE 
+        FROM comment_likes 
+        WHERE comment_id = $1 AND user_id = $2
+      `, [comment.id, userId])
+
+      isLiked = false;
+    } else {
+      // create like
+      await client.query(`
+        INSERT INTO comment_likes (
+          comment_id, user_id
+        ) VALUES ($1, $2)
+      `, [comment.id, userId])
+
+      isLiked = true;
+    }
+
+    // get likes count
+    const countRes = await client.query(`
+      SELECT COUNT(*)::INTEGER as likes_count FROM comment_likes WHERE comment_id = $1
+    `, [comment.id])
+
+    await client.query('COMMIT')
+
+    return res.status(isLiked ? 201 : 200).json({ 
+      success: true, 
+      message: isLiked ? "Comment liked" : "Comment unliked",
+      data: {
+        is_liked: isLiked,
+        likes_count: countRes.rows[0].likes_count
+      }
+    })
+  } catch (error) {
+    await client.query('ROLLBACK')
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to toggle comment like"})
+  } finally {
+    client.release()
   }
 }
 

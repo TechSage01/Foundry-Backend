@@ -16,9 +16,20 @@ CREATE TABLE IF NOT EXISTS comments (
   FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
   FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS comment_likes (
+  comment_id UUID NOT NULL,
+  user_id UUID NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+
+  PRIMARY KEY (comment_id, user_id),
+  FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+)
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE IF EXISTS comment_likes;
 DROP TABLE IF EXISTS comments;
 -- +goose StatementEnd
