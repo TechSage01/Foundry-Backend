@@ -299,7 +299,8 @@ Creates a new post for the authenticated user.
 | `title`          | string        | Yes      | Post's title                                       |
 | `subtitle`       | string        | No       | Post's subtitle/tagline.                           |
 | `content`        | string        | Yes      | Post's content.                                    |
-| `cover_image`    | File          | No       | Post's display image.                              |
+| `image`          | File          | No       | Post's image.                                      |
+| `video`          | File          | No       | Post's video                                       |
 | `tags`           | string        | No       | Post hash tags.                                    |
 | `is_published`   | string        | No       | "true" or "false" <"false" for drafts>.            |
 
