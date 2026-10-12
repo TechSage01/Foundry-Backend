@@ -80,11 +80,12 @@
 
 ### post comments
 
-| Method   | Endpoint                               | Description                                      |
-| -------- | -------------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/posts/{id}/comments`             | Create a comment                                 |
-| `GET`    | `/api/posts/{id}/comments`             | Fetch post comments                              |
-| `DELETE` | `/api/posts/{id}/comments/{commentId}` | Delete a comment                                 |
+| Method   | Endpoint                                     | Description                                      |
+| -------- | -------------------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/posts/{id}/comments`                   | Create a comment                                 |
+| `GET`    | `/api/posts/{id}/comments`                   | Fetch post comments                              |
+| `DELETE` | `/api/posts/{id}/comments/{commentId}`       | Delete a comment                                 |
+| `POST`   | `/api/posts/{id}/comments/{commentId}/likes` | Toggle a comment like                            |
 
 ### post bookmarks
 
