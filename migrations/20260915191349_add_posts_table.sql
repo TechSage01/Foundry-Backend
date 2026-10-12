@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS posts (
   slug VARCHAR(255) NOT NULL,
   subtitle VARCHAR(500),
   content TEXT NOT NULL,
-  cover_image_url TEXT,
+  media_url TEXT[] DEFAULT '{}',
   tags TEXT[] DEFAULT '{}',
   is_published BOOLEAN DEFAULT false,
   reading_time_minutes INTEGER DEFAULT 1,

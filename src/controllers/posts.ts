@@ -26,20 +26,39 @@ export const createPost = async (req: Request, res: Response) => {
 
   const validation = createPostSchema.safeParse(payload)
   if (!validation.success) {
+    console.log(validation.data)
     return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
   const { title, subtitle, content, tags, is_published } = validation.data;
 
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+  const imageFile = files?.["image"]?.[0];
+  const videoFile = files?.["video"]?.[0];
+
   try {
-    let coverImageUrl: string | null = null;
-    if (req.file) {
-      coverImageUrl = await uploadFile(
-        req.file.buffer,
-        req.file.originalname,
-        req.file.mimetype
+    // upload images
+    let imageUrl: string | null = null;
+    if (imageFile) {
+      imageUrl = await uploadFile(
+        imageFile.buffer,
+        imageFile.originalname,
+        imageFile.mimetype
       );
     }
+
+    // upload videos
+    let videoUrl: string | null = null;
+    if (videoFile) {
+      videoUrl = await uploadFile(
+        videoFile.buffer,
+        videoFile.originalname,
+        videoFile.mimetype
+      )
+    }
+
+    const mediaUrls = [imageUrl, videoUrl];
 
     const postId = uuidv4()
     const slug = slugify(title)
@@ -47,8 +66,8 @@ export const createPost = async (req: Request, res: Response) => {
     
     const { rows } = await pool.query(
       `INSERT INTO posts
-        (id, user_id, title, slug, subtitle, content, cover_image_url, tags, is_published, reading_time_minutes)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8::text[], $9, $10)
+        (id, user_id, title, slug, subtitle, content, media_url, tags, is_published, reading_time_minutes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7::text[], $8::text[], $9, $10)
        RETURNING *`,
       [
         postId,
@@ -57,7 +76,7 @@ export const createPost = async (req: Request, res: Response) => {
         slug,
         subtitle ?? null,
         content,
-        coverImageUrl,
+        mediaUrls,
         tags,
         is_published,
         readingTime,
@@ -86,7 +105,7 @@ export const getMyPosts = async (req: Request, res: Response) => {
          slug, 
          subtitle,
          content, 
-         cover_image_url, 
+         media_url, 
          tags,
          is_published,
          views_count, 
@@ -122,7 +141,7 @@ export const getMyDrafts = async (req: Request, res: Response) => {
          slug, 
          subtitle,
          content, 
-         cover_image_url, 
+         media_url, 
          tags,
          is_published,
          views_count, 
@@ -156,7 +175,7 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
          p.slug,
          p.subtitle,
          p.content,
-         p.cover_image_url,
+         p.media_url,
          p.tags,
          p.reading_time_minutes,
          p.views_count,
@@ -218,7 +237,7 @@ export const getUserPosts = async (req: Request, res: Response) => {
         p.slug,
         p.subtitle,
         p.content,
-        p.cover_image_url,
+        p.media_url,
         p.tags,
         p.reading_time_minutes,
         p.views_count,
@@ -273,7 +292,7 @@ export const getPost = async (req: Request, res: Response) => {
          up.slug,
          up.subtitle,
          up.content,
-         up.cover_image_url,
+         up.media_url,
          up.tags,
          up.is_published,
          up.reading_time_minutes,
@@ -319,7 +338,7 @@ export const fetchMyReposts = async (req: Request, res: Response) => {
          p.slug,
          p.subtitle,
          p.content,
-         p.cover_image_url,
+         p.media_url,
          p.tags,
          p.reading_time_minutes,
          p.views_count,

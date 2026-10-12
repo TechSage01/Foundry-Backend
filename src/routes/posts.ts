@@ -21,7 +21,15 @@ router.get("/:id/comments", fetchComments)
 router.get("/user/:username", getUserPosts)
 
 // Authenticated
-router.post("/", authMiddleware, uploadLimiter, upload.single("cover_image"), createPost)
+router.post("/", 
+  authMiddleware, 
+  uploadLimiter, 
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 }
+  ]),
+  createPost
+)
 router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updatePost)
 router.delete("/:id", authMiddleware, deletePost)
 

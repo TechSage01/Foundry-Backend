@@ -62,7 +62,7 @@ export const getMyBookmarks = async (req: Request, res: Response) => {
         p.slug,
         p.subtitle,
         p.content,
-        p.cover_image_url,
+        p.media_url,
         p.tags,
         p.reading_time_minutes,
         p.views_count,

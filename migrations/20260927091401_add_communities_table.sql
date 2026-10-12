@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS community_posts (
   slug VARCHAR(255) NOT NULL,
   subtitle VARCHAR(500),
   content TEXT NOT NULL,
-  cover_image_url TEXT,
+  media_url TEXT[] DEFAULT '{}',
   reading_time_minutes INTEGER DEFAULT 1,
   views_count INTEGER DEFAULT 0,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
