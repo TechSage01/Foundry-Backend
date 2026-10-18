@@ -20,7 +20,7 @@ router.post("/", authMiddleware, uploadLimiter, upload.single("icon"), createCom
 router.post("/:id/join", authMiddleware, joinCommunity)
 router.post("/:id/leave", authMiddleware, leaveCommunity)
 
-router.post("/:id/post", 
+router.post("/:id/posts", 
   authMiddleware, 
   uploadLimiter, 
   upload.fields([

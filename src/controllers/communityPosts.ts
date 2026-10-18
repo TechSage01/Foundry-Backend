@@ -6,7 +6,7 @@ import { uploadFile } from "../config/imagekit.js";
 import { calculateReadingTime, slugify } from "../utils/helpers.js";
 import { success } from "zod";
 
-// @route POST /api/communities/:id/post
+// @route POST /api/communities/:id/posts
 // @desc Create a new community post
 // @access Authenticated users & community members only
 export const createCommunityPost = async (req: Request, res: Response) => {
@@ -88,6 +88,8 @@ export const createCommunityPost = async (req: Request, res: Response) => {
 }
 
 // @route GET /api/communities/:id/posts
+// @desc Fetch community posts
+// @access Public
 export const fetchCommunityPosts = async (req: Request, res: Response) => {
   const { id } = req.params;
 

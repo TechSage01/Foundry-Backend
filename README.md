@@ -131,7 +131,7 @@
 
 | Method   | Endpoint                           | Description                                      |
 | -------- | ---------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/communities/{id}/post`       | Create a new communuty post                      |
+| `POST`   | `/api/communities/{id}/posts`       | Create a new communuty post                      |
 | `GET`    | `/api/communities/{id}/posts`      | Fetch all posts in a community                   |
 
 <br><br>
@@ -441,7 +441,7 @@ Fetches a paginated list of communities with optional filtering.
 
 ---
 
-**`POST /api/communities/:id/post`**
+**`POST /api/communities/:id/posts`**
 
 Creates a new post in a community.
 
