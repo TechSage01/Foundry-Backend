@@ -29,6 +29,12 @@ export const createCommunityPost = async (req: Request, res: Response) => {
 
   const { title, subtitle, content } = validation.data;
 
+  const uploadedFiles = (
+    Array.isArray(req.files) 
+      ? req.files 
+      : (req.files as { [fieldname: string]: Express.Multer.File[] })?.["image"]
+  ) ?? [];
+
   try {
     // verify community existence
     const communityCheck = await pool.query(`
@@ -41,22 +47,18 @@ export const createCommunityPost = async (req: Request, res: Response) => {
 
     // verify membership
     const membershipCheck = await pool.query(`
-      SELECT role FROM community_members WHERE user_id = $1
-    `, [userId])
+      SELECT role FROM community_members WHERE community_id = $1 AND user_id = $2
+    `, [id, userId])
 
     if (membershipCheck.rows.length === 0) {
-      return res.status(401).json({ success: false, message: "You must be a member to post in this community" })
+      return res.status(403).json({ success: false, message: "You must be a member to post in this community" })
     }
 
-    // upload file
-    let coverImageUrl: string | null = null;
-    if (req.file) {
-      coverImageUrl = await uploadFile(
-        req.file.buffer,
-        req.file.filename,
-        req.file.mimetype
+    const mediaUrls: string[] = await Promise.all(
+      uploadedFiles.map((file) => 
+        uploadFile(file.buffer, file.originalname, file.mimetype)
       )
-    }
+    );
 
     const postId = uuidv4();
     const slug = slugify(title);
@@ -64,8 +66,9 @@ export const createCommunityPost = async (req: Request, res: Response) => {
 
     const { rows } = await pool.query(`
       INSERT INTO community_posts (
-        id, community_id, author_id, title, slug, subtitle, content, cover_image_url, reading_time_minutes, views_count
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 0)
+        id, community_id, author_id, title, slug, subtitle, content, media_url, reading_time_minutes, views_count
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::TEXT[], $9, 0)
+      RETURNING *
     `, [
       postId,
       id,
@@ -74,7 +77,7 @@ export const createCommunityPost = async (req: Request, res: Response) => {
       slug,
       subtitle ?? null,
       content,
-      coverImageUrl,
+      mediaUrls,
       readingTimeMins,
     ]);
 
@@ -113,7 +116,7 @@ export const fetchCommunityPosts = async (req: Request, res: Response) => {
         cp.slug,
         cp.subtitle,
         cp.content,
-        cp.cover_image_url,
+        cp.media_url,
         cp.reading_time_minutes,
         cp.views_count,
         cp.created_at,

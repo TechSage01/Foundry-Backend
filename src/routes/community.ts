@@ -20,6 +20,13 @@ router.post("/", authMiddleware, uploadLimiter, upload.single("icon"), createCom
 router.post("/:id/join", authMiddleware, joinCommunity)
 router.post("/:id/leave", authMiddleware, leaveCommunity)
 
-router.post("/:id/post", authMiddleware, uploadLimiter, upload.single("cover_image"), createCommunityPost)
+router.post("/:id/post", 
+  authMiddleware, 
+  uploadLimiter, 
+  upload.fields([
+    { name: "image", maxCount: 3 },
+  ]),
+  createCommunityPost
+)
 
 export default router;
