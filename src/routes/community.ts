@@ -11,7 +11,7 @@ router.get("/me", authMiddleware, getMyCommunities)
 
 // Public
 router.get("/", optionalAuthMiddleware, fetchCommunities)
-router.get("/:slug", getCommunity)
+router.get("/:slug", optionalAuthMiddleware, getCommunity)
 router.get("/:slug/members", fetchCommunityMembers)
 router.get("/:id/posts", fetchCommunityPosts)
 

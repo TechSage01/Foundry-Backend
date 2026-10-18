@@ -10,8 +10,9 @@ import { slugify } from "../utils/helpers.js";
 // @access authenticated users
 export const createCommunity = async (req: Request, res: Response) => {
   const userId = req.user?.id;
+  const payload = {...req.body}
 
-  const validation = createCommunitySchema.safeParse(req.body)
+  const validation = createCommunitySchema.safeParse(payload)
   if (!validation.success) {
     return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
@@ -203,6 +204,7 @@ export const getMyCommunities = async (req: Request, res: Response) => {
 // @desc Get a community by slug
 // @access Public
 export const getCommunity = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
   const { slug } = req.params as { slug: string };
 
   if (!slug || slug == "") {
@@ -222,10 +224,11 @@ export const getCommunity = async (req: Request, res: Response) => {
         c.icon_url,
         c.created_at,
         (SELECT COUNT(*)::INTEGER AS members_count FROM community_members WHERE community_id = c.id),
-        (SELECT COUNT(*)::INTEGER AS posts_count FROM community_posts WHERE community_id = c.id)
+        (SELECT COUNT(*)::INTEGER AS posts_count FROM community_posts WHERE community_id = c.id),
+        EXISTS (SELECT 1 FROM community_members WHERE community_id = c.id AND user_id = $2) AS is_member
       FROM communities c
       WHERE slug = $1
-    `, [normalizedSlug])
+    `, [normalizedSlug, userId])
 
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "Community Not Found" })

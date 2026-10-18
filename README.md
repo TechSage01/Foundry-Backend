@@ -411,15 +411,15 @@ Fetches a paginated list of opportunities with optional filtering.
 
 Create a new community
 
-**Request Body**
+**Request Body (`multipart/form-data`)**
 
-```json
-{
-  "title": "string",
-  "description": "string",
-  "category": "string"
-}
-```
+| Field            | Type          | Required | Description                                        |
+| ---------------- | ------------- | -------- | -------------------------------------------------- |
+| `name`           | string        | Yes      | Community name                                     |
+| `icon`           | File          | No       | Community icon                                     |
+| `description`    | string        | Yes      | Community description.                             |
+| `category`       | string        | Yes      | Community category                                 |
+
 <br>
 
 ---
