@@ -45,10 +45,30 @@ CREATE TABLE IF NOT EXISTS community_posts (
   FOREIGN KEY(community_id) REFERENCES communities(id) ON DELETE CASCADE,
   FOREIGN KEY(author_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS community_comments (
+  id UUID PRIMARY KEY,
+  community_id UUID NOT NULL,
+  post_id UUID NOT NULL,
+  author_id UUID NOT NULL,
+  author_fullname VARCHAR(100) NOT NULL,
+  author_username VARCHAR(50) NOT NULL,
+  author_avatar_url TEXT,
+  parent_id UUID,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  FOREIGN KEY (community_id) REFERENCES communities(id) ON DELETE CASCADE,
+  FOREIGN KEY (post_id) REFERENCES community_posts(id) ON DELETE CASCADE,
+  FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (parent_id) REFERENCES community_comments(id) ON DELETE CASCADE
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE IF EXISTS community_comments;
 DROP TABLE IF EXISTS community_posts;
 DROP TABLE IF EXISTS community_members;
 DROP TABLE IF EXISTS communities;

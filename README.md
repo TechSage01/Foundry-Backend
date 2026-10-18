@@ -129,10 +129,12 @@
 
 ### community posts
 
-| Method   | Endpoint                           | Description                                      |
-| -------- | ---------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/communities/{id}/posts`       | Create a new communuty post                      |
-| `GET`    | `/api/communities/{id}/posts`      | Fetch all posts in a community                   |
+| Method   | Endpoint                                        | Description                                      |
+| -------- | ----------------------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/communities/{id}/posts`                   | Create a new communuty post                      |
+| `GET`    | `/api/communities/{id}/posts`                   | Fetch all posts in a community                   |
+| `POST`   | `/api/communities/{id}/posts/{postId}/comments` | Create a comment for a community post            |
+| `GET`    | `/api/communities/{id}/posts/{postId}/comments` | Fetch all comments under a community post        |
 
 <br><br>
 
@@ -468,6 +470,22 @@ Fetches a paginated list of community posts.
 | `page` | `integer` | No | `1` | Page number for pagination |
 | `limit` | `integer` | No | `12` | Number of items per page (max 50) |
 
+<br>
+
+---
+
+**`POST /api/communities/{id}/posts/{postId}/comments`**
+
+Create a comment for a community post.
+
+**Request Body**
+
+```json
+{
+  "parent_id": "string | null <parent comment id>",
+  "content": "string"
+}
+```
 
 
 
