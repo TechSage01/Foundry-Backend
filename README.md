@@ -115,6 +115,12 @@
 | `PUT`    | `/api/opportunities/{id}`          | Update an opportunity                            |
 | `DELETE` | `/api/opportunities/{id}`          | Delete an opportunity                            |
 
+### opportunity applications
+
+| Method   | Endpoint                           | Description                                      |
+| -------- | ---------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/opportunities/{id}/apply`    | Submit applications for opportunities            |
+
 ### communities
 
 | Method   | Endpoint                           | Description                                      |
@@ -404,6 +410,24 @@ Fetches a paginated list of opportunities with optional filtering.
 | :--- | :--- | :--- | :--- | :--- |
 | `page` | `integer` | No | `1` | Page number for pagination |
 | `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+
+<br>
+
+---
+
+**`POST /api/opportunities/:id/apply`**
+
+Submit application for an opportunity.
+
+**Request Body**
+
+```json
+{
+  "cover_note": "string",
+  "resume_url": "string | null",
+  "portfolio_url": "string | null"
+}
+```
 
 <br>
 

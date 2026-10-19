@@ -64,3 +64,9 @@ export const updateOpportunitiesSchema = z.object({
 }).refine((data) => Object.keys(data).length > 0, {
     message: "At least one field must be provided to update",
 });
+
+export const submitOpportunityApplicationSchema = z.object({
+  cover_note: z.string().trim().min(20, "Cover note must be at least 20 characters"),
+  resume_url: z.string().url("Invalid resume URL").optional().nullable(),
+  portfolio_url: z.string().url("Invalid portfolio URL").optional().nullable()
+});

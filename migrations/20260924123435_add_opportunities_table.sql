@@ -17,9 +17,26 @@ CREATE TABLE IF NOT EXISTS opportunities (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+
+CREATE TABLE IF NOT EXISTS opportunity_applications (
+  id UUID PRIMARY KEY,
+  opportunity_id UUID NOT NULL,
+  applicant_id UUID NOT NULL,
+  cover_note TEXT NOT NULL,
+  resume_url TEXT DEFAULT NULL,
+  portfolio_url TEXT DEFAULT NULL,
+  status VARCHAR(20) DEFAULT 'submitted' CHECK (status IN ('submitted', 'under_review', 'accepted', 'rejected', 'withdrawn')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+
+  CONSTRAINT uq_applicant_opportunity UNIQUE (opportunity_id, applicant_id),
+  FOREIGN KEY (opportunity_id) REFERENCES opportunities(id) ON DELETE CASCADE,
+  FOREIGN KEY (applicant_id) REFERENCES users(id) ON DELETE CASCADE
+);
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+DROP TABLE IF EXISTS opportunity_applications;
 DROP TABLE IF EXISTS opportunities;
 -- +goose StatementEnd
