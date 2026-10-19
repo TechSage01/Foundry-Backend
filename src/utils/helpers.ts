@@ -63,3 +63,20 @@ export const formatDate = (dateInput: any): string | null => {
     timeZone: "UTC",
   }).format(date);
 }
+
+export const formatDateFull = (dateInput: any): string | null => {
+  if (!dateInput) return null;
+
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+
+  if (isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "long",
+    year: "numeric",
+    day: "2-digit",
+    timeZone: "UTC",
+  }).format(date);
+}

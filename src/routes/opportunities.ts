@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
 import { createOpportunity, deleteOpportunity, fetchOpportunities, getMyOpportunities, getOpportunity, updateOpportunity } from "../controllers/opportunities.js";
-import { submitOpportunityApplications } from "../controllers/opportunityApplications.js";
+import { fetchOpportunityApplications, submitOpportunityApplications } from "../controllers/opportunityApplications.js";
 
 const router = Router();
 
@@ -17,5 +17,6 @@ router.put("/:id", authMiddleware, updateOpportunity)
 router.delete("/:id", authMiddleware, deleteOpportunity)
 
 router.post("/:id/apply", authMiddleware, submitOpportunityApplications)
+router.get("/:id/applications", authMiddleware, fetchOpportunityApplications)
 
 export default router;

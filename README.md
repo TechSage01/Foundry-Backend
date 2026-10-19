@@ -117,9 +117,10 @@
 
 ### opportunity applications
 
-| Method   | Endpoint                           | Description                                      |
-| -------- | ---------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/opportunities/{id}/apply`    | Submit applications for opportunities            |
+| Method   | Endpoint                               | Description                                      |
+| -------- | -------------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/opportunities/{id}/apply`        | Submit applications for opportunities            |
+| `GET`    | `/api/opportunities/{id}/applications` | Fetch all applicants for an opportunity          |
 
 ### communities
 
