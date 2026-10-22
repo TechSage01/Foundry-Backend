@@ -121,6 +121,7 @@
 | -------- | -------------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/opportunities/{id}/apply`        | Submit applications for opportunities            |
 | `GET`    | `/api/opportunities/{id}/applications` | Fetch all applicants for an opportunity          |
+| `GET`    | `/api/opportunities/me/applications`   | Fetch all applications submited by the user      |
 
 ### communities
 

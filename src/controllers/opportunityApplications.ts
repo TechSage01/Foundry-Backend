@@ -116,3 +116,44 @@ export const fetchOpportunityApplications = async (req: Request, res: Response) 
     return res.status(500).json({ success: false, message: "Failed to fetch applications" })
   }
 }
+
+// @route GET /api/opportunities/me/applications
+// @desc Fetch all applications belonging to the user
+// @access Authenticated users only
+export const fetchMyApplications = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  try {
+    const { rows } = await pool.query(`
+      SELECT
+        o.category,
+        o.title,
+        o.description,
+        o.required_skills,
+        o.work_arrangement,
+        o.location_range,
+        o.compensation,
+        o.deadline_at,
+        oa.cover_note,
+        oa.resume_url,
+        oa.portfolio_url,
+        oa.status,
+        oa.created_at AS applied_at
+      FROM opportunities o
+      JOIN opportunity_applications oa ON o.id = oa.opportunity_id
+      WHERE oa.applicant_id = $1
+      ORDER BY oa.created_at DESC
+    `, [userId])
+
+    const applications = rows.map(r => {
+      let { applied_at, ...row } = r
+      applied_at = formatDateFull(applied_at)
+
+      return { ...row, applied_at }
+    })
+
+    return res.status(200).json({ success: false, data: applications })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch applications" })
+  }
+}
