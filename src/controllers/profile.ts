@@ -47,7 +47,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
   }
 }
 
-// @route PUT /api/profile
+// @route PATCH /api/profile
 // @desc Update profile
 // @access Authenticated users only
 export const updateProfile = async (req: Request, res: Response) => {

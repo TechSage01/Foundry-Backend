@@ -530,7 +530,7 @@ export const deleteRepost = async (req: Request, res: Response) => {
   }
 }
 
-// @route PUT /api/posts/:id
+// @route PATCH /api/posts/:id
 // @desc update a post
 // @access Authenticated users
 export const updatePost = async (req: Request, res: Response) => {

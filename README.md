@@ -14,7 +14,7 @@
 
 | Method   | Endpoint                        | Description                   |
 | -------- | ------------------------------- | ----------------------------- |
-| `PUT`    | `/api/profile`                  | Update profile                |
+| `PATCH`  | `/api/profile`                  | Update profile                |
 
 
 ### users
@@ -31,7 +31,7 @@
 | `GET`    | `/api/projects`                    | Fetch all published projects                  |
 | `GET`    | `/api/projects/{slug}`             | Get a project                                 |
 | `GET`    | `/api/projects/user/{username}`    | Get all projects from a user                  |
-| `PUT`    | `/api/projects/{id}`               | Update project                                | 
+| `PATCH`  | `/api/projects/{id}`               | Update project                                | 
 | `DELETE` | `/api/projects/{id}`               | Delete project                                |
 
 
@@ -58,7 +58,7 @@
 | -------- | ---------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/experiences`                 | Create new experience/journey                    |
 | `GET`    | `/api/experiences/user/{username}` | Fetch all experiences associated with a username |
-| `PUT`    | `/api/experiences/{id}`            | Update experience                                |
+| `PATCH`  | `/api/experiences/{id}`            | Update experience                                |
 | `DELETE` | `/api/experiences/{id}`            | Delete experience                                |
 
 
@@ -72,7 +72,7 @@
 | `GET`    | `/api/posts/me/drafts`             | Fetch all owned posts drafts for a user          |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `GET`    | `/api/posts/user/{username}`       | Fetch all posts associated with a username       |
-| `PUT`    | `/api/posts/{id}`                  | Update a post                                    |
+| `PATCH`  | `/api/posts/{id}`                  | Update a post                                    |
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
 | `POST`   | `/api/posts/{id}/likes`            | Toggle like status for a post                    |
 | `POST`   | `/api/posts/{id}/repost`           | Repost a post                                    |
@@ -112,7 +112,7 @@
 | `GET`    | `/api/opportunities`               | Fetch all opportunities                          |
 | `GET`    | `/api/opportunities/me`            | Fetch all owned opportunities for a user         |
 | `GET`    | `/api/opportunities/{id}`          | Get a single opportunity                         |
-| `PUT`    | `/api/opportunities/{id}`          | Update an opportunity                            |
+| `PATCH`  | `/api/opportunities/{id}`          | Update an opportunity                            |
 | `DELETE` | `/api/opportunities/{id}`          | Delete an opportunity                            |
 
 ### opportunity applications
@@ -150,7 +150,7 @@
 
 <br>
 
-**`PUT /api/profile`**
+**`PATCH /api/profile`**
 
 Updates the authenticated user's profile.
 
@@ -210,7 +210,7 @@ Fetches a paginated list of published projects with optional technology tag filt
 
 ---
 
-**`PUT /api/projects/{id}`**
+**`PATCH /api/projects/{id}`**
 
 Update an existing project for the authenticated user.
 
@@ -274,7 +274,7 @@ Create a new experience/journey for the authenticated user.
 
 ---
 
-**`PUT /api/experiences/{id}`**
+**`PATCH /api/experiences/{id}`**
 
 Update an experience/journey.
 
@@ -321,7 +321,7 @@ Creates a new post for the authenticated user.
 
 <br>
 
-**`PUT /api/posts/:id`**
+**`PATCH /api/posts/:id`**
 
 Updates a post for the authenticated user.
 
@@ -368,6 +368,32 @@ Create a new opportunity.
   "category": "string",
   "title": "string",
   "description": "string",
+  "required_skills": "string[] e.g JSON.stringify(['Java', 'AI']) | null",
+  "work_arrangement": "remote | hybrid | onsite",
+  "location_range": "string | null",
+  "compensation": "string | null",
+  "deadline_at": "Date | null",
+  "fast_apply_enabled": "Boolean | null",
+  "external_apply_url": "string | null",
+  "screening_prompt": "string | null"
+}
+```
+
+<br>
+
+---
+
+**`PATCH /api/opportunities/:id`**
+
+Update an opportunity
+
+**Request Body**
+
+```json
+{
+  "category": "string | null",
+  "title": "string | null",
+  "description": "string | null",
   "required_skills": "string[] e.g JSON.stringify(['Java', 'AI']) | null",
   "work_arrangement": "remote | hybrid | onsite",
   "location_range": "string | null",

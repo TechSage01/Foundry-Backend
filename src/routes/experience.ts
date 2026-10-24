@@ -9,7 +9,7 @@ router.get("/user/:username", getExperiencesByUsername)
 
 // Authenticated
 router.post("/", authMiddleware, createExperience)
-router.put("/:id", authMiddleware, updateExperience)
+router.patch("/:id", authMiddleware, updateExperience)
 router.delete("/:id", authMiddleware, deleteExperience)
 
 export default router;

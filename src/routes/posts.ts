@@ -30,7 +30,7 @@ router.post("/",
   ]),
   createPost
 )
-router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updatePost)
+router.patch("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updatePost)
 router.delete("/:id", authMiddleware, deletePost)
 
 // likes

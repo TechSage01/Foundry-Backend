@@ -16,7 +16,7 @@ router.get("/:id/likes", optionalAuthMiddleware, getProjectLikes)
 
 // projects
 router.post("/", authMiddleware, uploadLimiter, upload.single("cover_image"), createProject)
-router.put("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updateProject)
+router.patch("/:id", authMiddleware, uploadLimiter, upload.single("cover_image"), updateProject)
 router.delete("/:id", authMiddleware, deleteProject)
 
 // project phases

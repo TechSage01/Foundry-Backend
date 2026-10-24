@@ -267,7 +267,7 @@ export const getUserProjects = async (req: Request, res: Response) => {
   }
 }
 
-// @route PUT /api/projects/{id}
+// @route PATCH /api/projects/{id}
 // @desc Update a project
 // @access Owner only
 export const updateProject = async (req: Request, res: Response) => {

@@ -14,7 +14,7 @@ router.get("/:id", getOpportunity)
 
 // Authenticated
 router.post("/", authMiddleware, createOpportunity);
-router.put("/:id", authMiddleware, updateOpportunity)
+router.patch("/:id", authMiddleware, updateOpportunity)
 router.delete("/:id", authMiddleware, deleteOpportunity)
 
 router.post("/:id/apply", authMiddleware, submitOpportunityApplications)

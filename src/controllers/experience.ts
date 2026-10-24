@@ -94,7 +94,7 @@ export const getExperiencesByUsername = async (req: Request, res: Response) => {
   }
 }
 
-// @route PUT /api/experiences/:id
+// @route PATCH /api/experiences/:id
 // @desc Update an existing experience
 // @access Authenticated users
 export const updateExperience = async (req: Request, res: Response) => {

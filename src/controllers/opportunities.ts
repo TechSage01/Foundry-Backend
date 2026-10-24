@@ -257,7 +257,7 @@ export const getOpportunity = async (req: Request, res: Response) => {
   }
 }
 
-// @route PUT /api/opportunities/:id
+// @route PATCH /api/opportunities/:id
 // @desc update an opportunity
 // @access author only
 export const updateOpportunity = async (req: Request, res: Response) => {
@@ -296,7 +296,7 @@ export const updateOpportunity = async (req: Request, res: Response) => {
       ? required_skills.map((s) => s.trim().toLowerCase())
       : null;
 
-    const { rows } = await pool.query(`
+    const { rowCount } = await pool.query(`
       UPDATE opportunities
       SET category = COALESCE($1, category),
           title = COALESCE($2, title),
@@ -327,6 +327,9 @@ export const updateOpportunity = async (req: Request, res: Response) => {
       userId
     ]);
 
+    if (rowCount === 0) {
+      return res.status(500).json({ success: false, message: "Failed to update opportunity"})
+    }
 
     return res.status(200).json({ success: true, message: "Opportunity Updated" })
   } catch (error) {

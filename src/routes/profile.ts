@@ -5,7 +5,7 @@ import { upload } from "../middlewares/upload.js";
 
 const router = Router();
 
-router.put("/", 
+router.patch("/", 
   authMiddleware, 
   upload.fields([
     { name: "avatar", maxCount: 1 },
