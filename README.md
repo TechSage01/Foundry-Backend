@@ -144,6 +144,12 @@
 | `POST`   | `/api/communities/{id}/posts/{postId}/comments` | Create a comment for a community post            |
 | `GET`    | `/api/communities/{id}/posts/{postId}/comments` | Fetch all comments under a community post        |
 
+### conversations
+
+| Method   | Endpoint                                        | Description                                      |
+| -------- | ----------------------------------------------- | ------------------------------------------------ |
+| `POST`   | `/api/conversations/messages`                   | Send a chat message                              | 
+
 <br><br>
 
 ## Docs
@@ -539,5 +545,20 @@ Create a comment for a community post.
 }
 ```
 
+<br>
 
+---
+
+**`POST /api/conversations/messages`**
+
+Send a chat message.
+
+**Request Body (`multipart/form-data`)**
+
+| Field               | Type          | Required | Description                                        |
+| ------------------- | ------------- | -------- | -------------------------------------------------- |
+| `conversation_id`   | string        | No       | Conversation Id                                    |
+| `recipent_id`       | string        | No       | Receiver's user Id.                                |
+| `content`           | string        | Yes      | Message content.                                   |
+| `files`             | File[]        | No       | Files & medias
 

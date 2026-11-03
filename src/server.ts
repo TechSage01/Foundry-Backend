@@ -13,6 +13,7 @@ import opportunitiesRouter from "./routes/opportunities.js"
 import communitiesRouter from "./routes/community.js"
 import postRouter from "./routes/posts.js"
 import userRouter from "./routes/user.js"
+import conversationRouter from "./routes/conversation.js"
 import pool from "./config/db.js";
 import logger from "./middlewares/logger.js";
 import { globalLimiter, uploadLimiter } from "./middlewares/limiter.js";
@@ -51,6 +52,7 @@ app.use("/api/posts", postRouter)
 app.use("/api/users", userRouter)
 app.use("/api/opportunities", opportunitiesRouter)
 app.use("/api/communities", communitiesRouter)
+app.use("/api/conversations", conversationRouter)
 
 const PORT = process.env.PORT || 5000;
 
