@@ -8,3 +8,7 @@ export const sendMessageSchema = z.object({
   message: "Either conversation_id or recipent_id must be provided",
   path: ["conversation_id"],
 });
+
+export const getConversationsQuerySchema = z.object({
+  type: z.enum(["direct", "group", "project"]).optional(),
+})

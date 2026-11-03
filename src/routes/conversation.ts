@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createMessage } from "../controllers/conversation.js";
+import { createMessage, getConversations } from "../controllers/conversation.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { upload } from "../middlewares/upload.js";
 
@@ -12,5 +12,7 @@ router.post("/messages",
   upload.array("files", 5),
   createMessage
 )
+
+router.get("/", authMiddleware, getConversations)
 
 export default router;
