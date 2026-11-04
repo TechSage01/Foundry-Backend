@@ -151,6 +151,7 @@
 | `POST`   | `/api/conversations/messages`                   | Send a chat message                              | 
 | `GET`    | `/api/conversations`                            | Get all conversations (e.g for sidebar)          |
 | `GET`    | `/api/conversations/{id}/messages`              | Fetch message history for a conversation         |
+| `PATCH`  | `/api/conversations/{id}/read`                  | Mark a conversation as read                      |
 
 <br><br>
 
