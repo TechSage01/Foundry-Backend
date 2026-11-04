@@ -149,6 +149,8 @@
 | Method   | Endpoint                                        | Description                                      |
 | -------- | ----------------------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/conversations/messages`                   | Send a chat message                              | 
+| `GET`    | `/api/conversations`                            | Get all conversations (e.g for sidebar)          |
+| `GET`    | `/api/conversations/{id}/messages`              | Fetch message history for a conversation         |
 
 <br><br>
 
@@ -561,4 +563,33 @@ Send a chat message.
 | `recipent_id`       | string        | No       | Receiver's user Id.                                |
 | `content`           | string        | Yes      | Message content.                                   |
 | `files`             | File[]        | No       | Files & medias
+
+<br>
+
+---
+
+**`GET /api/conversations`**
+
+Fetch all conversations.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `type` | `direct - group - project` | No | `null` | Optional conversation filter |
+
+<br>
+
+---
+
+**`GET /api/conversations/:id/messages`**
+
+Fetch message history for a conversation.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `limit` | `integer` | No | `10` | Message limit |
+| `cursor` | `Date`  | No | `null` | Date timestamp for optional filtering |
 

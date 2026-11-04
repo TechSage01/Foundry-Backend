@@ -12,3 +12,12 @@ export const sendMessageSchema = z.object({
 export const getConversationsQuerySchema = z.object({
   type: z.enum(["direct", "group", "project"]).optional(),
 })
+
+export const getMessagesQuerySchema = z.object({
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => val ? parseInt(val, 10) : 30)
+    .pipe(z.number().min(1).max(100)),
+  cursor: z.string().datetime().optional()
+})

@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
-import { getConversationsQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
+import { getConversationsQuerySchema, getMessagesQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
 import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
-import { v4 as uuidv4  } from "uuid";
+import { v4 as uuidv4, validate as isUuid  } from "uuid";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -207,5 +207,80 @@ export const getConversations = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ success: false, message: "Failed to fetch conversations" })
+  }
+}
+
+// @route GET /api/conversations/:id/messages
+// @desc get all messages for a specific convo
+// @access Authenticated users
+export const getMessages = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const convoId = req.params.id;
+
+  if (!convoId || !isUuid(convoId)) {
+    return res.status(400).json({ success: false, message: "Conversation Id is required" })
+  }
+
+  const validation = getMessagesQuerySchema.safeParse(req.query);
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  }
+
+  const { limit, cursor } = validation.data;
+
+  try {
+    const membershipCheck = await pool.query(`
+      SELECT role FROM conversation_members WHERE conversation_id = $1 AND user_id = $2 
+    `, [convoId, userId])
+
+    if (membershipCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Conversation Not Found" })
+    }
+
+    const query = `
+      SELECT
+        m.id,
+        m.conversation_id,
+        m.sender_id,
+        prof.full_name AS sender_name,
+        prof.avatar_url AS sender_avatar_url,
+        m.content,
+        m.attachments,
+        m.created_at,
+        m.updated_at
+      FROM messages m
+      JOIN profiles prof ON m.sender_id = prof.user_id
+      WHERE m.conversation_id = $1
+        AND ($2::TIMESTAMPTZ IS NULL OR m.created_at < $2)
+      ORDER BY m.created_at DESC
+      LIMIT $3
+    `;
+
+    const { rows } = await pool.query(query, [convoId, cursor || null, limit]);
+
+    const messages = rows.reverse();
+    const nextCursor = rows.length === limit ? rows[0].created_at : null;
+
+    await pool.query(`
+      UPDATE conversation_members
+      SET last_read_at = NOW()
+      WHERE conversation_id = $1 AND user_id = $2  
+    `, [convoId, userId])
+
+    return res.status(200).json({
+      success: true,
+      data: messages,
+      pagination: {
+        next_cursor: nextCursor,
+        has_more: rows.length === limit
+      }
+    })
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Failed to fetch messages"})
   }
 }
