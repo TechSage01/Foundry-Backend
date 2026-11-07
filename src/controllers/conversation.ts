@@ -81,7 +81,10 @@ export const createMessage = async (req: Request, res: Response) => {
     // EXISTING CONVERSATION BRANCH
     if (conversation_id) {
       const membershipCheck = await client.query(`
-        SELECT role FROM conversation_members WHERE conversation_id = $1 AND user_id = $2
+        SELECT 
+          role 
+        FROM conversation_members 
+        WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
       `, [conversation_id, userId])
 
       if (membershipCheck.rows.length === 0) {
@@ -297,7 +300,10 @@ export const getMessages = async (req: Request, res: Response) => {
 
   try {
     const membershipCheck = await pool.query(`
-      SELECT role FROM conversation_members WHERE conversation_id = $1 AND user_id = $2 
+      SELECT 
+        role 
+      FROM conversation_members 
+      WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
     `, [convoId, userId])
 
     if (membershipCheck.rows.length === 0) {
@@ -362,7 +368,7 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
     const query = `
       UPDATE conversation_members
       SET last_read_at = NOW()
-      WHERE conversation_id = $1 AND user_id = $2
+      WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
       RETURNING conversation_id, user_id, last_read_at
     `;
 
