@@ -580,6 +580,7 @@ Create a new conversation group.
 | ------------------- | ------------- | -------- | -------------------------------------------------- |
 | `type`              | string        | Yes      | Conversation type - Group or Project.              |
 | `name`              | string        | Yes      | Group name                                         |
+| `join_policy`       | string        | No       | Approval type - Open or Required                   |
 
 <br>
 

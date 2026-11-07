@@ -22,6 +22,7 @@ router.post("/",
   createConversation
 );
 
+router.post("/:id/join", authMiddleware)
 router.patch("/:id/read", authMiddleware, markConversationsAsRead)
 
 export default router;

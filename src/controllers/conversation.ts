@@ -3,6 +3,7 @@ import { createGroupConversationSchema, getConversationsQuerySchema, getMessages
 import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
+import crypto from "crypto";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -146,7 +147,7 @@ export const createConversation = async (req: Request, res: Response) => {
     })
   }
 
-  const { type, name } = validation.data;
+  const { type, name, join_policy } = validation.data;
 
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
   const iconFile = files?.["icon"]?.[0];
@@ -162,12 +163,13 @@ export const createConversation = async (req: Request, res: Response) => {
     await client.query('BEGIN')
 
     const conversationId = uuidv4();
+    const inviteCode = crypto.randomBytes(8).toString("hex")
     
     const { rows } = await client.query(`
-      INSERT INTO conversations (id, type, name, icon_url)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO conversations (id, type, name, icon_url, join_policy, invite_link)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, type, name, icon_url, created_at, last_message_at
-    `, [conversationId, type, name, iconUrl || null])
+    `, [conversationId, type, name, iconUrl || null, join_policy, inviteCode])
 
     await client.query(`
       INSERT INTO conversation_members (conversation_id, user_id, role)
@@ -179,7 +181,10 @@ export const createConversation = async (req: Request, res: Response) => {
     return res.status(201).json({ 
       success: true,
       message: `${type === "group" ? "Group" : "Project"} conversation created`,
-      data: rows[0]
+      data: {
+        ...rows[0],
+        invite_link: `/messages/join/${inviteCode}`
+      }
     })
   } catch (error) {
     await client.query('ROLLBACK')
@@ -344,7 +349,7 @@ export const getMessages = async (req: Request, res: Response) => {
 
 // @route PATCH /api/conversations/:id/read
 // @desc mark a conversation as read
-// @desc Members only
+// @access Members only
 export const markConversationsAsRead = async (req: Request, res: Response) => {
   const convoId = req.params.id;
   const userId = req.user?.id;
@@ -375,4 +380,13 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to mark conversation as read" })
   }
+}
+
+
+
+// @route POST /api/conversations/:id/join
+// @desc join a group conversation
+// @access Authenticated users only
+export const joinConversation = async (req: Request, res: Response) => {
+
 }

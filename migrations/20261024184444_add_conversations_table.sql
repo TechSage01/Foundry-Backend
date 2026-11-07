@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS conversations (
   name VARCHAR(255) DEFAULT NULL,
   icon_url TEXT DEFAULT NULL,
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  join_policy VARCHAR(20) DEFAULT 'open' CHECK (join_policy IN ('open', 'approval_required')),
+  invite_link VARCHAR(32) UNIQUE DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -14,6 +16,7 @@ CREATE TABLE IF NOT EXISTS conversation_members (
   conversation_id UUID NOT NULL,
   user_id UUID NOT NULL,
   role VARCHAR(20) DEFAULT 'member' CHECK (role IN ('owner', 'admin', 'member')),
+  status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'pending', 'rejected')),
   last_read_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
 

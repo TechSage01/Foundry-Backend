@@ -12,6 +12,7 @@ export const sendMessageSchema = z.object({
 export const createGroupConversationSchema = z.object({
   type: z.enum(["group", "project"]),
   name: z.string().trim().min(3, "Name must be at least 3 characters long"),
+  join_policy: z.enum(['open', 'approval_required']).default('open'),
 })
 
 export const getConversationsQuerySchema = z.object({
