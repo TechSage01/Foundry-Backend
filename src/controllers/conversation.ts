@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { getConversationsQuerySchema, getMessagesQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
+import { createGroupConversationSchema, getConversationsQuerySchema, getMessagesQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
 import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
-// @access Authenticated users
+// @access Authenticated users only
 export const createMessage = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const payload = {...req.body};
@@ -130,9 +130,68 @@ export const createMessage = async (req: Request, res: Response) => {
   }
 }
 
+// @route POST /api/conversations
+// @desc create a new group or project conversation
+// @access Authenticated users only
+export const createConversation = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const payload = {...req.body};
+
+  const validation = createGroupConversationSchema.safeParse(payload)
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  }
+
+  const { type, name } = validation.data;
+
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+  const iconFile = files?.["icon"]?.[0];
+
+  const client = await pool.connect();
+
+  try {
+    let iconUrl: string | null = null;
+    if (iconFile) {
+      iconUrl = await uploadFile(iconFile.buffer, iconFile.originalname, iconFile.mimetype)
+    }
+
+    await client.query('BEGIN')
+
+    const conversationId = uuidv4();
+    
+    const { rows } = await client.query(`
+      INSERT INTO conversations (id, type, name, icon_url)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, type, name, icon_url, created_at, last_message_at
+    `, [conversationId, type, name, iconUrl || null])
+
+    await client.query(`
+      INSERT INTO conversation_members (conversation_id, user_id, role)
+      VALUES ($1, $2, $3)
+    `, [conversationId, userId, 'owner'])
+
+    await client.query('COMMIT')
+
+    return res.status(201).json({ 
+      success: true,
+      message: `${type === "group" ? "Group" : "Project"} conversation created`,
+      data: rows[0]
+    })
+  } catch (error) {
+    await client.query('ROLLBACK')
+    return res.status(500).json({ success: false, message: "Failed to create conversation" })
+  } finally {
+    client.release()
+  }
+}
+
 // @route GET /api/conversations
 // @desc get all conversations for the authenticated user
-// @access Authenticated users
+// @access Members only
 export const getConversations = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
@@ -205,14 +264,13 @@ export const getConversations = async (req: Request, res: Response) => {
       data: rows,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ success: false, message: "Failed to fetch conversations" })
   }
 }
 
 // @route GET /api/conversations/:id/messages
 // @desc get all messages for a specific convo
-// @access Authenticated users
+// @access Members only
 export const getMessages = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const convoId = req.params.id;
@@ -280,7 +338,41 @@ export const getMessages = async (req: Request, res: Response) => {
       }
     })
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ success: false, message: "Failed to fetch messages"})
+  }
+}
+
+// @route PATCH /api/conversations/:id/read
+// @desc mark a conversation as read
+// @desc Members only
+export const markConversationsAsRead = async (req: Request, res: Response) => {
+  const convoId = req.params.id;
+  const userId = req.user?.id;
+
+  if (!convoId || !isUuid(convoId)) {
+    return res.status(400).json({ success: false, message: "Conversation Id is required" })
+  }
+
+  try {
+    const query = `
+      UPDATE conversation_members
+      SET last_read_at = NOW()
+      WHERE conversation_id = $1 AND user_id = $2
+      RETURNING conversation_id, user_id, last_read_at
+    `;
+
+    const { rows, rowCount } = await pool.query(query, [convoId, userId]);
+
+    if (rowCount === 0) {
+      return res.status(403).json({ success: false, message: "You are not a member of this conversation" })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Conversation marked as read",
+      data: rows[0]
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to mark conversation as read" })
   }
 }
