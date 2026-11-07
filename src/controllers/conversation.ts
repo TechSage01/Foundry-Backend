@@ -4,6 +4,7 @@ import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
 import crypto from "crypto";
+import { success } from "zod";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -388,11 +389,69 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
   }
 }
 
-
-
-// @route POST /api/conversations/:id/join
-// @desc join a group conversation
-// @access Authenticated users only
+// @route POST /api/conversations/join/:code
+// @desc join a conversation by code
+// @access Authenticated users
 export const joinConversation = async (req: Request, res: Response) => {
+  const code = req.params.code;
+  const userId = req.user?.id;
 
+  if (!code) {
+    return res.status(400).json({ success: false, message: "Invite code is required" })
+  }
+
+  try {
+    const convResult = await pool.query(`
+      SELECT id, name join_policy FROM conversations WHERE invite_link = $1
+    `, [code])
+
+    if (convResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Invalid or Expired Invite Code" })
+    }
+
+    const conv = convResult.rows[0];
+
+    const existingMember = await pool.query(`
+      SELECT status FROM conversation_members WHERE conversation_id = $1 AND user_id = $2
+    `, [conv.id, userId])
+
+    if (existingMember.rows.length > 0) {
+      const { status } = existingMember.rows[0];
+
+      if (status === "active") {
+        return res.status(200).json({ 
+          success: true, 
+          status: "active", 
+          message: "Already a member", 
+          conversation_id: conv.id 
+        })
+      }
+
+      if (status === "pending") {
+        return res.status(409).json({ success: false, message: "Your request is pending approval "})
+      }
+    }
+
+    const initialStatus = conv.join_policy === "approval_required" ? "pending" : "active";
+
+    await pool.query(`
+      INSERT INTO conversation_members 
+        (conversation_id, user_id, role, status, last_read_at)
+      VALUES ($1, $2, 'member', $3, NOW())
+      ON CONFLICT (conversation_id, user_id)
+      DO UPDATE SET status = EXCLUDED.status
+    `, [conv.id, userId, initialStatus])
+
+    return res.status(initialStatus === "pending" ? 202 : 200).json({
+      success: true,
+      status: initialStatus === "pending" ? "pending" : "active",
+      message: initialStatus === "pending" ? "Request Submitted. Waiting Admin Approval" : `Successfully joined ${conv.name}`,
+      ...(initialStatus === "active" && {
+        conversation_id: conv.id
+      })
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to join Group" })
+  }
 }
