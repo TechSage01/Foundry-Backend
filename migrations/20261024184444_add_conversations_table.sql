@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS conversations (
   id UUID PRIMARY KEY,
   type VARCHAR(20) NOT NULL CHECK (type IN ('direct', 'group', 'project')),
   name VARCHAR(255) DEFAULT NULL,
+  icon_url TEXT DEFAULT NULL,
   last_message_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

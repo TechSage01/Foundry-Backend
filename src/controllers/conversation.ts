@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import { getConversationsQuerySchema, getMessagesQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
+import { createGroupConversationSchema, getConversationsQuerySchema, getMessagesQuerySchema, sendMessageSchema } from "../schemas/conversation.js";
 import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
-// @access Members only
+// @access Authenticated users only
 export const createMessage = async (req: Request, res: Response) => {
   const userId = req.user?.id;
   const payload = {...req.body};
@@ -125,6 +125,65 @@ export const createMessage = async (req: Request, res: Response) => {
   } catch (error) {
     await client.query('ROLLBACK')
     return res.status(500).json({ success: false, message: "Failed to send message" })
+  } finally {
+    client.release()
+  }
+}
+
+// @route POST /api/conversations
+// @desc create a new group or project conversation
+// @access Authenticated users only
+export const createConversation = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const payload = {...req.body};
+
+  const validation = createGroupConversationSchema.safeParse(payload)
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  }
+
+  const { type, name } = validation.data;
+
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+  const iconFile = files?.["icon"]?.[0];
+
+  const client = await pool.connect();
+
+  try {
+    let iconUrl: string | null = null;
+    if (iconFile) {
+      iconUrl = await uploadFile(iconFile.buffer, iconFile.originalname, iconFile.mimetype)
+    }
+
+    await client.query('BEGIN')
+
+    const conversationId = uuidv4();
+    
+    const { rows } = await client.query(`
+      INSERT INTO conversations (id, type, name, icon_url)
+      VALUES ($1, $2, $3, $4)
+      RETURNING id, type, name, icon_url, created_at, last_message_at
+    `, [conversationId, type, name, iconUrl || null])
+
+    await client.query(`
+      INSERT INTO conversation_members (conversation_id, user_id, role)
+      VALUES ($1, $2, $3)
+    `, [conversationId, userId, 'owner'])
+
+    await client.query('COMMIT')
+
+    return res.status(201).json({ 
+      success: true,
+      message: `${type === "group" ? "Group" : "Project"} conversation created`,
+      data: rows[0]
+    })
+  } catch (error) {
+    await client.query('ROLLBACK')
+    return res.status(500).json({ success: false, message: "Failed to create conversation" })
   } finally {
     client.release()
   }

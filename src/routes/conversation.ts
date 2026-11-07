@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createMessage, getConversations, getMessages, markConversationsAsRead } from "../controllers/conversation.js";
+import { createConversation, createMessage, getConversations, getMessages, markConversationsAsRead } from "../controllers/conversation.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { upload } from "../middlewares/upload.js";
 
@@ -14,6 +14,12 @@ router.post("/messages",
   uploadLimiter,
   upload.array("files", 5),
   createMessage
+);
+router.post("/", 
+  authMiddleware,
+  uploadLimiter,
+  upload.single("icon"),
+  createConversation
 );
 
 router.patch("/:id/read", authMiddleware, markConversationsAsRead)

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { xid, z } from "zod";
 
 export const sendMessageSchema = z.object({
   conversation_id: z.uuid().optional(),
@@ -8,6 +8,11 @@ export const sendMessageSchema = z.object({
   message: "Either conversation_id or recipent_id must be provided",
   path: ["conversation_id"],
 });
+
+export const createGroupConversationSchema = z.object({
+  type: z.enum(["group", "project"]),
+  name: z.string().trim().min(3, "Name must be at least 3 characters long"),
+})
 
 export const getConversationsQuerySchema = z.object({
   type: z.enum(["direct", "group", "project"]).optional(),
