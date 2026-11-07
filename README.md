@@ -149,6 +149,7 @@
 | Method   | Endpoint                                        | Description                                      |
 | -------- | ----------------------------------------------- | ------------------------------------------------ |
 | `POST`   | `/api/conversations/messages`                   | Send a chat message                              | 
+| `POST`   | `/api/conversations`                            | Create a new conversation group                  |
 | `GET`    | `/api/conversations`                            | Get all conversations (e.g for sidebar)          |
 | `GET`    | `/api/conversations/{id}/messages`              | Fetch message history for a conversation         |
 | `PATCH`  | `/api/conversations/{id}/read`                  | Mark a conversation as read                      |
@@ -564,6 +565,21 @@ Send a chat message.
 | `recipent_id`       | string        | No       | Receiver's user Id.                                |
 | `content`           | string        | Yes      | Message content.                                   |
 | `files`             | File[]        | No       | Files & medias
+
+<br>
+
+---
+
+**`POST /api/conversations`**
+
+Create a new conversation group.
+
+**Request Body (`multipart/form-data`)**
+
+| Field               | Type          | Required | Description                                        |
+| ------------------- | ------------- | -------- | -------------------------------------------------- |
+| `type`              | string        | Yes      | Conversation type - Group or Project.              |
+| `name`              | string        | Yes      | Group name                                         |
 
 <br>
 
