@@ -75,7 +75,6 @@ export const createMessage = async (req: Request, res: Response) => {
           INSERT INTO conversation_members (conversation_id, user_id, role)
           VALUES ($1, $2, 'owner'), ($1, $3, 'member')
         `, [targetConversationId, userId, recipent_id])
-        console.log("created new conv members......")
       }
     }
 
@@ -457,7 +456,7 @@ export const joinConversation = async (req: Request, res: Response) => {
 
 // @route GET /api/conversations/:id/requests
 // @desc fetch conversation group pending requests
-// @access Owners Only
+// @access Owners & Admins Only
 export const getPendingJoinRequests = async (req: Request, res: Response) => {
   const convoId = req.params.id;
   const userId = req.user?.id;
@@ -499,5 +498,57 @@ export const getPendingJoinRequests = async (req: Request, res: Response) => {
     return res.status(200).json({ success: true, data: data })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch pending requets" })
+  }
+}
+
+// @route PATCH /api/conversations/:id/requests/:applicantId
+// @desc approve or reject user application
+// @access Owners & Admins Only
+export const reviewPendingRequets = async (req: Request, res: Response) => {
+  const { id, applicantId } = req.params;
+  const { action } = req.body;
+  const userId = req.user?.id;
+
+  if (!id || !isUuid(id)) {
+    return res.status(400).json({ success: false, message: "Invalid Conversation Id" })
+  }
+
+  if (!applicantId || !isUuid(applicantId)) {
+    return res.status(400).json({ success: false, message: "Invalid Applicant Id" })
+  }
+
+  if (action !== "approve" && action != "reject") {
+    return res.status(400).json({ success: false, message: "Action must be either 'approve' or 'reject'"})
+  }
+
+  try {
+    const adminCheck = await pool.query(`
+      SELECT role FROM conversation_members
+      WHERE conversation_id = $1 AND user_id = $2 AND role IN ('owner', 'admin') AND status = 'active'
+    `, [id, userId])
+
+    if (adminCheck.rows.length === 0) {
+      return res.status(403).json({ success: false, message: "Admin Access Required" })
+    }
+
+    const newStatus = action === "approve" ? "active" : "rejected";
+    
+    const { rows, rowCount } = await pool.query(`
+      UPDATE conversation_members
+      SET status = $1, last_read_at = NOW()
+      WHERE conversation_id = $2 AND user_id = $3 AND status = 'pending'
+    `, [newStatus, id, applicantId])
+
+    if (rowCount === 0) {
+      console.log(rows)
+      return res.status(404).json({ success: false, message: "Pending request not found" })
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Request ${action === "approve" ? "Approved" : "Rejected"} successfully` 
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to review application" })
   }
 }
