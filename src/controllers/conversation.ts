@@ -3,6 +3,8 @@ import { createGroupConversationSchema, getConversationsQuerySchema, getMessages
 import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
+import crypto from "crypto";
+import { formatDateFull } from "../utils/helpers.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -80,7 +82,10 @@ export const createMessage = async (req: Request, res: Response) => {
     // EXISTING CONVERSATION BRANCH
     if (conversation_id) {
       const membershipCheck = await client.query(`
-        SELECT role FROM conversation_members WHERE conversation_id = $1 AND user_id = $2
+        SELECT 
+          role 
+        FROM conversation_members 
+        WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
       `, [conversation_id, userId])
 
       if (membershipCheck.rows.length === 0) {
@@ -146,7 +151,7 @@ export const createConversation = async (req: Request, res: Response) => {
     })
   }
 
-  const { type, name } = validation.data;
+  const { type, name, join_policy } = validation.data;
 
   const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
   const iconFile = files?.["icon"]?.[0];
@@ -162,12 +167,13 @@ export const createConversation = async (req: Request, res: Response) => {
     await client.query('BEGIN')
 
     const conversationId = uuidv4();
+    const inviteCode = crypto.randomBytes(8).toString("hex")
     
     const { rows } = await client.query(`
-      INSERT INTO conversations (id, type, name, icon_url)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO conversations (id, type, name, icon_url, join_policy, invite_link)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING id, type, name, icon_url, created_at, last_message_at
-    `, [conversationId, type, name, iconUrl || null])
+    `, [conversationId, type, name, iconUrl || null, join_policy, inviteCode])
 
     await client.query(`
       INSERT INTO conversation_members (conversation_id, user_id, role)
@@ -179,7 +185,10 @@ export const createConversation = async (req: Request, res: Response) => {
     return res.status(201).json({ 
       success: true,
       message: `${type === "group" ? "Group" : "Project"} conversation created`,
-      data: rows[0]
+      data: {
+        ...rows[0],
+        invite_link: `/messages/join/${inviteCode}`
+      }
     })
   } catch (error) {
     await client.query('ROLLBACK')
@@ -292,7 +301,10 @@ export const getMessages = async (req: Request, res: Response) => {
 
   try {
     const membershipCheck = await pool.query(`
-      SELECT role FROM conversation_members WHERE conversation_id = $1 AND user_id = $2 
+      SELECT 
+        role 
+      FROM conversation_members 
+      WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
     `, [convoId, userId])
 
     if (membershipCheck.rows.length === 0) {
@@ -344,7 +356,7 @@ export const getMessages = async (req: Request, res: Response) => {
 
 // @route PATCH /api/conversations/:id/read
 // @desc mark a conversation as read
-// @desc Members only
+// @access Members only
 export const markConversationsAsRead = async (req: Request, res: Response) => {
   const convoId = req.params.id;
   const userId = req.user?.id;
@@ -357,7 +369,7 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
     const query = `
       UPDATE conversation_members
       SET last_read_at = NOW()
-      WHERE conversation_id = $1 AND user_id = $2
+      WHERE conversation_id = $1 AND user_id = $2 AND status = 'active'
       RETURNING conversation_id, user_id, last_read_at
     `;
 
@@ -374,5 +386,118 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
     })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to mark conversation as read" })
+  }
+}
+
+// @route POST /api/conversations/join/:code
+// @desc join a conversation by code
+// @access Authenticated users
+export const joinConversation = async (req: Request, res: Response) => {
+  const code = req.params.code;
+  const userId = req.user?.id;
+
+  if (!code) {
+    return res.status(400).json({ success: false, message: "Invite code is required" })
+  }
+
+  try {
+    const convResult = await pool.query(`
+      SELECT id, name join_policy FROM conversations WHERE invite_link = $1
+    `, [code])
+
+    if (convResult.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Invalid or Expired Invite Code" })
+    }
+
+    const conv = convResult.rows[0];
+
+    const existingMember = await pool.query(`
+      SELECT status FROM conversation_members WHERE conversation_id = $1 AND user_id = $2
+    `, [conv.id, userId])
+
+    if (existingMember.rows.length > 0) {
+      const { status } = existingMember.rows[0];
+
+      if (status === "active") {
+        return res.status(200).json({ 
+          success: true, 
+          status: "active", 
+          message: "Already a member", 
+          conversation_id: conv.id 
+        })
+      }
+
+      if (status === "pending") {
+        return res.status(409).json({ success: false, message: "Your request is pending approval "})
+      }
+    }
+
+    const initialStatus = conv.join_policy === "approval_required" ? "pending" : "active";
+
+    await pool.query(`
+      INSERT INTO conversation_members 
+        (conversation_id, user_id, role, status, last_read_at)
+      VALUES ($1, $2, 'member', $3, NOW())
+      ON CONFLICT (conversation_id, user_id)
+      DO UPDATE SET status = EXCLUDED.status
+    `, [conv.id, userId, initialStatus])
+
+    return res.status(initialStatus === "pending" ? 202 : 200).json({
+      success: true,
+      status: initialStatus === "pending" ? "pending" : "active",
+      message: initialStatus === "pending" ? "Request Submitted. Waiting Admin Approval" : `Successfully joined ${conv.name}`,
+      ...(initialStatus === "active" && {
+        conversation_id: conv.id
+      })
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to join Group" })
+  }
+}
+
+// @route GET /api/conversations/:id/requests
+// @desc fetch conversation group pending requests
+// @access Owners Only
+export const getPendingJoinRequests = async (req: Request, res: Response) => {
+  const convoId = req.params.id;
+  const userId = req.user?.id;
+
+  if (!convoId || !isUuid(convoId)) {
+    return res.status(400).json({ success: false, message: "Conversation Id Required" })
+  }
+
+  try {
+    const adminCheck = await pool.query(`
+      SELECT role FROM conversation_members
+      WHERE conversation_id = $1 AND user_id = $2 AND role IN ('owner', 'admin') AND status = 'active'
+    `, [convoId, userId])
+
+    if (adminCheck.rows.length === 0) {
+      return res.status(403).json({ success: false, message: "Admin Access Required" })
+    }
+
+    const { rows } = await pool.query(`
+      SELECT 
+        cm.user_id, 
+        cm.joined_at AS requested_at, 
+        prof.full_name, 
+        prof.username,
+        prof.avatar_url
+      FROM conversation_members cm
+      JOIN profiles prof ON cm.user_id = prof.user_id
+      WHERE cm.conversation_id = $1 AND cm.status = 'pending'
+      ORDER BY cm.joined_at ASC
+    `, [convoId])
+
+    const data = rows.map(usr => {
+      let { requested_at, ...row } = usr;
+      requested_at = formatDateFull(requested_at);
+
+      return { ...row, requested_at }
+    })
+
+    return res.status(200).json({ success: true, data: data })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch pending requets" })
   }
 }
