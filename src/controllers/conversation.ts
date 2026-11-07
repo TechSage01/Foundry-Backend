@@ -4,7 +4,7 @@ import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
 import crypto from "crypto";
-import { success } from "zod";
+import { formatDateFull } from "../utils/helpers.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -451,7 +451,54 @@ export const joinConversation = async (req: Request, res: Response) => {
       })
     })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to join Group" })
+  }
+}
+
+// @route GET /api/conversations/:id/requests
+// @desc fetch conversation group pending requests
+// @access Owners Only
+export const getPendingJoinRequests = async (req: Request, res: Response) => {
+  const convoId = req.params.id;
+  const userId = req.user?.id;
+
+  if (!convoId || !isUuid(convoId)) {
+    return res.status(400).json({ success: false, message: "Conversation Id Required" })
+  }
+
+  try {
+    const adminCheck = await pool.query(`
+      SELECT role FROM conversation_members
+      WHERE conversation_id = $1 AND user_id = $2 AND role IN ('owner', 'admin') AND status = 'active'
+    `, [convoId, userId])
+
+    if (adminCheck.rows.length === 0) {
+      return res.status(403).json({ success: false, message: "Admin Access Required" })
+    }
+
+    const { rows } = await pool.query(`
+      SELECT 
+        cm.user_id, 
+        cm.joined_at AS requested_at, 
+        prof.full_name, 
+        prof.username,
+        prof.avatar_url
+      FROM conversation_members cm
+      JOIN profiles prof ON cm.user_id = prof.user_id
+      WHERE cm.conversation_id = $1 AND cm.status = 'pending'
+      ORDER BY cm.joined_at ASC
+    `, [convoId])
+
+    const data = rows.map(usr => {
+      let { requested_at, ...row } = usr;
+      requested_at = formatDateFull(requested_at);
+
+      return { ...row, requested_at }
+    })
+
+    return res.status(200).json({ success: true, data: data })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Failed to fetch pending requets" })
   }
 }
