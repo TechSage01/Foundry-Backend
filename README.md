@@ -153,6 +153,8 @@
 | `GET`    | `/api/conversations`                            | Get all conversations (e.g for sidebar)          |
 | `GET`    | `/api/conversations/{id}/messages`              | Fetch message history for a conversation         |
 | `PATCH`  | `/api/conversations/{id}/read`                  | Mark a conversation as read                      |
+| `POST`   | `/api/conversations/join/{code}`                | Join a conversation group with the invite code   |
+| `GET`    | `/api/conversations/{id}/requests`              | Fetch group pending requests                    || 
 
 <br><br>
 
