@@ -27,5 +27,4 @@ router.patch("/:id/read", authMiddleware, markConversationsAsRead)
 router.post("/join/:code", authMiddleware, joinConversation)
 router.patch("/:id/requests/:applicantId", authMiddleware, reviewPendingRequets)
 
-
 export default router;
