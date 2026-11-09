@@ -146,15 +146,28 @@
 
 ### conversations
 
-| Method   | Endpoint                                        | Description                                      |
-| -------- | ----------------------------------------------- | ------------------------------------------------ |
-| `POST`   | `/api/conversations/messages`                   | Send a chat message                              | 
-| `POST`   | `/api/conversations`                            | Create a new conversation group                  |
-| `GET`    | `/api/conversations`                            | Get all conversations (e.g for sidebar)          |
-| `GET`    | `/api/conversations/{id}/messages`              | Fetch message history for a conversation         |
-| `PATCH`  | `/api/conversations/{id}/read`                  | Mark a conversation as read                      |
-| `POST`   | `/api/conversations/join/{code}`                | Join a conversation group with the invite code   |
-| `GET`    | `/api/conversations/{id}/requests`              | Fetch group pending requests                    || 
+| Method   | Endpoint                                         | Description                                      |
+| -------- | ------------------------------------------------ | ------------------------------------------------ |
+| `POST`   | `/api/conversations/messages`                    | Send a chat message                              | 
+| `POST`   | `/api/conversations`                             | Create a new conversation group                  |
+| `GET`    | `/api/conversations`                             | Get all conversations (e.g for sidebar)          |
+| `GET`    | `/api/conversations/{id}/messages`               | Fetch message history for a conversation         |
+| `PATCH`  | `/api/conversations/{id}/read`                   | Mark a conversation as read                      |
+| `POST`   | `/api/conversations/join/{code}`                 | Join a conversation group with the invite code   |
+| `GET`    | `/api/conversations/{id}/requests`               | Fetch group pending requests                     |
+| `PATCH`  | `/api/conversations/{id}/requests/{applicantId}` | Review pending request                           |
+
+<br>
+
+## Real-time WebSockets (Conversations)
+
+| Event                 | Parameter         | Direction             | Description                                     |
+| --------------------- | ----------------- | --------------------- | ----------------------------------------------- |
+| `conversation:join`   | `conversationId`  | Client &rarr; Server  | Request to join a conversation channel          |
+| `conversation:joined` |                   | Server &rarr; Client  | Room subscription confirmation                  |
+| `conversation:leave`  | `conversationId`  | Client &rarr; Server  | Request to leave a conversation channel         | 
+| `message:new`         |                   | Server &rarr; Client  | Broadcast of new messages to room subscribers   |
+| `error`               |                   | Server &rarr; Client  | Operation failed                                |
 
 <br><br>
 
@@ -612,4 +625,19 @@ Fetch message history for a conversation.
 | :--- | :--- | :--- | :--- | :--- |
 | `limit` | `integer` | No | `10` | Message limit |
 | `cursor` | `Date`  | No | `null` | Date timestamp for optional filtering |
+
+<br>
+
+---
+
+**`PATCH /api/conversations/:id/requests/:applicantId`**
+
+**Request Body**
+
+```json
+{
+  "action": "approve || reject"
+}
+```
+
 

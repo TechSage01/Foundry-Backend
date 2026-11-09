@@ -10,7 +10,6 @@ export const issueCallbackToken = (req: Request, res: Response) => {
 
     if (process.env.NODE_ENV === "production") {
       // cookies for prod
-
       res.cookie("foundry_token", token, {
         httpOnly: true,
         secure: true,
@@ -18,7 +17,7 @@ export const issueCallbackToken = (req: Request, res: Response) => {
         maxAge: 24 * 60 * 60 * 1000 // 1 day
       })
 
-      res.redirect(`${process.env.CLIENT_URL}/auth/callback`)
+      return res.redirect(`${process.env.CLIENT_URL}/auth/callback`)
     }
 
     // auth headers for dev

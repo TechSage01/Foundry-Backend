@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth.js";
-import { createConversation, createMessage, getConversations, getMessages, getPendingJoinRequests, joinConversation, markConversationsAsRead } from "../controllers/conversation.js";
+import { createConversation, createMessage, getConversations, getMessages, getPendingJoinRequests, joinConversation, markConversationsAsRead, reviewPendingRequets } from "../controllers/conversation.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { upload } from "../middlewares/upload.js";
 
@@ -23,7 +23,8 @@ router.post("/",
   createConversation
 );
 
-router.post("/join/:code", authMiddleware, joinConversation)
 router.patch("/:id/read", authMiddleware, markConversationsAsRead)
+router.post("/join/:code", authMiddleware, joinConversation)
+router.patch("/:id/requests/:applicantId", authMiddleware, reviewPendingRequets)
 
 export default router;
