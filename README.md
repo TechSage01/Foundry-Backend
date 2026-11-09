@@ -157,6 +157,18 @@
 | `GET`    | `/api/conversations/{id}/requests`               | Fetch group pending requests                     |
 | `PATCH`  | `/api/conversations/{id}/requests/{applicantId}` | Review pending request                           |
 
+<br>
+
+## Real-time WebSockets (Conversations)
+
+| Event                 | Parameter         | Direction             | Description                                     |
+| --------------------- | ----------------- | --------------------- | ----------------------------------------------- |
+| `conversation:join`   | `conversationId`  | Client &rarr; Server  | Request to join a conversation channel          |
+| `conversation:joined` |                   | Server &rarr; Client  | Room subscription confirmation                  |
+| `conversation:leave`  | `conversationId`  | Client &rarr; Server  | Request to leave a conversation channel         | 
+| `message:new`         |                   | Server &rarr; Client  | Broadcast of new messages to room subscribers   |
+| `error`               |                   | Server &rarr; Client  | Operation failed                                |
+
 <br><br>
 
 ## Docs
