@@ -10,7 +10,6 @@ export const socketMiddleware = (socket: Socket, next: (err?: Error) => void) =>
   if (!rawCookieHeader) {
     return next(new Error("UNAUTHORIZED ACCESS"))
   }
-  console.log("raw cookie header: ", rawCookieHeader)
 
   const cookies = parseCookie(rawCookieHeader);
   const token = cookies.foundry_token;

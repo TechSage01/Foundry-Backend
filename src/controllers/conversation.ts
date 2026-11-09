@@ -4,7 +4,8 @@ import { uploadFile } from "../config/imagekit.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4, validate as isUuid  } from "uuid";
 import crypto from "crypto";
-import { formatDateFull } from "../utils/helpers.js";
+import { formatDateFull, formatTimeOnly } from "../utils/helpers.js";
+import { getIO } from "../socket/index.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -107,6 +108,15 @@ export const createMessage = async (req: Request, res: Response) => {
       content || null,
       JSON.stringify(attachments)
     ]);
+
+    const { created_at, ...row } = rows[0];
+    const formatedTime = formatTimeOnly(created_at);
+    const newMessage = { ...row, formatedTime}
+
+    // BROADCAST live event to all sockets in the room
+    getIO()
+      .to(`conversation:${conversation_id}`)
+      .emit("message:new", newMessage)
 
     // UPDATE read stamps
     await client.query(`

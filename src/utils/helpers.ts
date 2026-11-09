@@ -80,3 +80,18 @@ export const formatDateFull = (dateInput: any): string | null => {
     timeZone: "UTC",
   }).format(date);
 }
+
+export const formatTimeOnly = (dateInput: unknown): string | null => {
+  if (!dateInput) return null;
+
+  const date = dateInput instanceof Date ? dateInput : new Date(dateInput as any);
+
+  if (isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "UTC",
+  }).format(date);
+};
