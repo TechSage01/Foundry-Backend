@@ -104,7 +104,7 @@ export const createMessage = async (req: Request, res: Response) => {
     `;
     const { rows } = await client.query(insertMessageQuery, [
       messageId,
-      conversation_id,
+      targetConversationId,
       userId,
       content || null,
       JSON.stringify(attachments)
@@ -138,6 +138,7 @@ export const createMessage = async (req: Request, res: Response) => {
       }
     })
   } catch (error) {
+    console.error(error)
     await client.query('ROLLBACK')
     return res.status(500).json({ success: false, message: "Failed to send message" })
   } finally {
