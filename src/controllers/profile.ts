@@ -18,6 +18,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
   try {
     const { rows } = await pool.query(`
       SELECT
+        user_id,
         username,
         full_name,
         headline,
