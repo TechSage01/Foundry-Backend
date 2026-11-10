@@ -161,13 +161,17 @@
 
 ## Real-time WebSockets (Conversations)
 
-| Event                 | Parameter         | Direction             | Description                                     |
-| --------------------- | ----------------- | --------------------- | ----------------------------------------------- |
-| `conversation:join`   | `conversationId`  | Client &rarr; Server  | Request to join a conversation channel          |
-| `conversation:joined` |                   | Server &rarr; Client  | Room subscription confirmation                  |
-| `conversation:leave`  | `conversationId`  | Client &rarr; Server  | Request to leave a conversation channel         | 
-| `message:new`         |                   | Server &rarr; Client  | Broadcast of new messages to room subscribers   |
-| `error`               |                   | Server &rarr; Client  | Operation failed                                |
+| Event                 | Parameter         | Direction             | Description                                      |
+| --------------------- | ----------------- | --------------------- | ------------------------------------------------ |
+| `conversation:join`   | `conversationId`  | Client &rarr; Server  | Request to join a conversation channel           |
+| `conversation:joined` |                   | Server &rarr; Client  | Room subscription confirmation                   |
+| `conversation:leave`  | `conversationId`  | Client &rarr; Server  | Request to leave a conversation channel          | 
+| `message:new`         |                   | Server &rarr; Client  | Broadcast of new messages to room subscribers    |
+| `typing:start`        | `conversationId`  | Client &rarr; Server  | Start notifying the channel on user typing state |
+| `typing:display`      |                   | Server &rarr; Client  | Server broadcasting user typing                  |
+| `typing:stop`         | `conversationId`  | Client &rarr; Server  | Stop notifying the channel on user typing state  |
+| `conversation:read`   |                   | Server &rarr; Client  | A user just read the latest messages             |
+| `error`               |                   | Server &rarr; Client  | Operation failed                                 |
 
 <br><br>
 

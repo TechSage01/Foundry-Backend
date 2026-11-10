@@ -2,6 +2,7 @@ import { Server as HTTPServer} from "http";
 import { Server } from "socket.io";
 import { AuthSocket, socketMiddleware } from "../middlewares/socketAuth.js";
 import { registerRoomHandlers } from "./handlers/room.js";
+import { registerTypingHandlers } from "./handlers/typing.js";
 
 let io: Server;
 
@@ -21,6 +22,7 @@ export const initSocketServer = (httpServer: HTTPServer): Server => {
 
     // handlers
     registerRoomHandlers(authSocket)
+    registerTypingHandlers(authSocket)
 
     authSocket.on("disconnect", (reason) => {
       console.log(`[SOCKET DISCONNECTED] Reason: ${reason}`)

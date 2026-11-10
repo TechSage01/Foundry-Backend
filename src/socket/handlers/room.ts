@@ -1,6 +1,7 @@
 import { Socket } from "socket.io";
 import { AuthSocket } from "../../middlewares/socketAuth.js";
 import pool from "../../config/db.js";
+import { getRoomName } from "../utils.js";
 
 export const registerRoomHandlers = (socket: Socket) => {
   const authSocket = socket as AuthSocket;
@@ -21,7 +22,7 @@ export const registerRoomHandlers = (socket: Socket) => {
         return
       }
 
-      const roomName = `conversation:${conversationId}`;
+      const roomName = getRoomName(conversationId);
       authSocket.join(roomName);
 
       authSocket.emit("conversation:joined", { conversation_id: conversationId })
@@ -36,7 +37,7 @@ export const registerRoomHandlers = (socket: Socket) => {
   });
 
   authSocket.on("conversation:leave", (conversationId: string) => {
-    const roomName = `conversation:${conversationId}`;
+    const roomName = getRoomName(conversationId);
     authSocket.leave(roomName);
     console.log(`[SOCKET] User: ${userId} left room ${roomName}`)
   });

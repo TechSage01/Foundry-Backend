@@ -6,6 +6,7 @@ import { v4 as uuidv4, validate as isUuid  } from "uuid";
 import crypto from "crypto";
 import { formatDateFull, formatTimeOnly } from "../utils/helpers.js";
 import { getIO } from "../socket/index.js";
+import { getRoomName } from "../socket/utils.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -115,7 +116,7 @@ export const createMessage = async (req: Request, res: Response) => {
 
     // BROADCAST live event to all sockets in the room
     getIO()
-      .to(`conversation:${conversation_id}`)
+      .to(getRoomName(conversation_id!))
       .emit("message:new", newMessage)
 
     // UPDATE read stamps
@@ -367,7 +368,7 @@ export const getMessages = async (req: Request, res: Response) => {
 // @desc mark a conversation as read
 // @access Members only
 export const markConversationsAsRead = async (req: Request, res: Response) => {
-  const convoId = req.params.id;
+  const convoId = req.params.id as string;
   const userId = req.user?.id;
 
   if (!convoId || !isUuid(convoId)) {
@@ -387,6 +388,14 @@ export const markConversationsAsRead = async (req: Request, res: Response) => {
     if (rowCount === 0) {
       return res.status(403).json({ success: false, message: "You are not a member of this conversation" })
     }
+
+    getIO()
+      .to(getRoomName(convoId!))
+      .emit("conversation:read", {
+        conversation_id: convoId,
+        user_id: userId,
+        last_read_at: formatTimeOnly(rows[0].last_read_at)
+      })
 
     return res.status(200).json({
       success: true,
