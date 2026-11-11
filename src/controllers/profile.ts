@@ -5,8 +5,42 @@ import { updateProfileSchema } from "../schemas/profile.js";
 import { uploadFile } from "../config/imagekit.js";
 import { formatDate } from "../utils/helpers.js";
 
+// @route GET /api/users
+// @desc Fetch list of users by query
+// @access Authenticated users
+export const fetchUsers = async (req: Request, res: Response) => {
+  const q = req.query.q as string;
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+
+  try {
+    const searchTerm = `%${q.toLowerCase().trim()}%`;
+
+    const { rows } = await pool.query(`
+      SELECT
+        full_name,
+        username,
+        avatar_url
+      FROM profiles 
+      WHERE full_name ILIKE $1 OR username ILIKE $1
+      ORDER BY username ASC
+      LIMIT $2 OFFSET $3
+    `, [searchTerm, limit, offset])
+
+    return res.status(200).json({ 
+      success: true, 
+      count: rows.length,
+      data: rows, 
+      page
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch users" })
+  }
+}
+
 // @route GET /api/users/:username
-// @desc Fecth a user's profile
+// @desc Fetch a user's profile
 // @access Public
 export const getUserProfile = async (req: Request, res: Response) => {
   const { username } = req.params;

@@ -13,15 +13,16 @@
 ### profile
 
 | Method   | Endpoint                        | Description                   |
-| -------- | ------------------------------- | ----------------------------- |
+| -------- | ------------------------------- | ----------------------------- |  
 | `PATCH`  | `/api/profile`                  | Update profile                |
 
 
 ### users
 
-| Method   | Endpoint                        | Description                     |
-| -------- | ------------------------------- | ------------------------------- |
-| `GET`    | `/api/users/{username}`         | Get a user profile              | 
+| Method   | Endpoint                        | Description                      |
+| -------- | ------------------------------- | -------------------------------- |
+| `GET`    | `/api/users`                    | Fetch a paginated list of users  |
+| `GET`    | `/api/users/{username}`         | Get a user profile               | 
 
 ### projects
 
@@ -178,6 +179,21 @@
 ## Docs
 
 <br>
+
+**`GET /api/users`**
+
+Fetch a paginated lists of users.
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+
+<br>
+
+---
 
 **`PATCH /api/profile`**
 
