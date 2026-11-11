@@ -246,6 +246,7 @@ export const getConversations = async (req: Request, res: Response) => {
             SELECT json_build_object (
               'id', prof.user_id,
               'name', prof.full_name,
+              'username', prof.username,
               'avatar_url', prof.avatar_url
             )
             FROM conversation_members cm_partner
@@ -255,6 +256,24 @@ export const getConversations = async (req: Request, res: Response) => {
           )
           ELSE NULL
         END AS partner,
+        CASE
+          WHEN c.type = 'group' THEN (
+            SELECT json_agg(
+              json_build_object(
+                'id', prof.user_id,
+                'name', prof.full_name,
+                'username', prof.username,
+                'avatar_url', prof.avatar_url,
+                'role', cm_group.role
+              )
+            )
+            FROM conversation_members cm_group
+            JOIN profiles prof ON cm_group.user_id = prof.user_id
+            WHERE cm_group.conversation_id = c.id 
+              AND cm_group.status = 'active'
+          )
+          ELSE NULL
+        END AS members,
         (
           SELECT json_build_object (
             'id', m.id,
