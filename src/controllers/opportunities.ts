@@ -67,7 +67,6 @@ export const createOpportunity = async (req: Request, res: Response) => {
 
     return res.status(201).json({ success: true, message: "Opportunity created successfully", data: rows[0] })
   } catch (err) {
-    console.error("Error creating opportunity: ", err)
     return res.status(500).json({ success: false, message: "Failed to create opportunity" })
   }
 } 
@@ -252,7 +251,6 @@ export const getOpportunity = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows[0] })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to get opportunity", error })
   }
 }
@@ -333,7 +331,6 @@ export const updateOpportunity = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "Opportunity Updated" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to update opportunity"})
   }
 }

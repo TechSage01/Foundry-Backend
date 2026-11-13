@@ -138,7 +138,6 @@ export const createMessage = async (req: Request, res: Response) => {
       }
     })
   } catch (error) {
-    console.error(error)
     await client.query('ROLLBACK')
     return res.status(500).json({ success: false, message: "Failed to send message" })
   } finally {

@@ -41,7 +41,6 @@ export const createPostBookmark = async (req: Request, res: Response) => {
 
     return res.status(201).json({ success: true, message: "Bookmark Successful"})
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to bookmark post" })
   }
 };
@@ -79,7 +78,6 @@ export const getMyBookmarks = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch bookmarked posts" })
   }
 }
@@ -123,7 +121,6 @@ export const deletePostBookmark = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "Bookmark Removed"})
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to remove post bookmark" })
   }
 };

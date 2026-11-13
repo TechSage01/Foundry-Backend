@@ -66,7 +66,6 @@ export const createComment = async (req: Request, res: Response) => {
 
     return res.status(201).json({ success: true, message: "Comment Created" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create comment "})
   }
 }
@@ -157,7 +156,6 @@ export const toggleCommentLike = async (req: Request, res: Response) => {
     })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to toggle comment like"})
   } finally {
     client.release()
@@ -192,7 +190,6 @@ export const fetchComments = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: nestedComments })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
   }
 }
@@ -242,7 +239,6 @@ export const deleteComment = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "Comment Deleted"})
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to delete comment" })
   }
 }

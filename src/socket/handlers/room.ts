@@ -28,7 +28,6 @@ export const registerRoomHandlers = (socket: Socket) => {
       authSocket.emit("conversation:joined", { conversation_id: conversationId })
       console.log(`[SOCKET] User: ${userId} joined room ${roomName}`)
     } catch (error) {
-      console.error(`[SOCKET ERROR] conversation:join: `, error)
       authSocket.emit("error", {
         event: "conversation:join",
         message: "Failed to join room"

@@ -57,7 +57,6 @@ export const createProject = async (req: Request, res: Response) => {
 
     return res.status(201).json({ success: true, message: "Project Created", data: rows[0] });
   } catch (err) {
-    console.error('Error creating project:', err);
     return res.status(500).json({ success: false, message: 'Failed to create project' });
   }
 }

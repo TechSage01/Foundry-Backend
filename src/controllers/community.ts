@@ -65,7 +65,6 @@ export const createCommunity = async (req: Request, res: Response) => {
     return res.status(201).json({ success: true, message: "Community Created", data: communityRes.rows[0] })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create community" })
   } finally {
     client.release();
@@ -159,7 +158,6 @@ export const fetchCommunities = async (req: Request, res: Response) => {
       data: communityResult.rows 
     })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch communities" })
   }
 }
@@ -195,7 +193,6 @@ export const getMyCommunities = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to get communities" })
   }
 }
@@ -236,7 +233,6 @@ export const getCommunity = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows[0] })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to get community" })
   }
 }
@@ -267,7 +263,6 @@ export const fetchCommunityMembers = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch community members" })
   }
 }
@@ -309,7 +304,6 @@ export const joinCommunity = async (req: Request, res: Response) => {
 
     return res.status(201).json({ success: true, message: "Successfully joined the community"})
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to join community" })
   }
 }
@@ -362,7 +356,6 @@ export const leaveCommunity = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "You've left the community"})
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to exit community"})
   }
 }

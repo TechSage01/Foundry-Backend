@@ -133,7 +133,6 @@ export const fetchCommunityPosts = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch community post" })
   }
 }
@@ -212,7 +211,6 @@ export const createCommunityPostComments = async (req: Request, res: Response) =
     return res.status(201).json({ success: true, message: "Comment Created" })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to create comment" })
   } finally {
     client.release()
@@ -272,7 +270,6 @@ export const fetchCommunityPostsComments = async (req: Request, res: Response) =
     return res.status(200).json({ success: true, data: nestedComments })
   } catch(error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch comments." })
   } finally {
     client.release()

@@ -134,7 +134,6 @@ export const getFollowing = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, count: rows.length, data: rows });
   } catch (error) {
-    console.error("Error fetching following:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch following" });
   }
 };

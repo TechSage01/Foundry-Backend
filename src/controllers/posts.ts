@@ -263,7 +263,6 @@ export const getUserPosts = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch user posts" })
   }
 }
@@ -365,7 +364,6 @@ export const fetchMyReposts = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, data: rows })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
   }
 }
@@ -437,7 +435,6 @@ export const togglePostLike = async (req: Request, res: Response) => {
     })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to toggle project likes" })
   } finally {
     client.release()
@@ -483,7 +480,6 @@ export const createRepost = async (req: Request, res: Response) => {
       message: "Post Reposted"
     })
   } catch (error) {
-    console.error(error);
     return res.status(500).json({ success: false, message: "Failed to repost" })
   } 
 }
@@ -525,7 +521,6 @@ export const deleteRepost = async (req: Request, res: Response) => {
 
     return res.status(200).json({ success: true, message: "Repost removed" })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to delete repost" })
   }
 }

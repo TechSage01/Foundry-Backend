@@ -60,7 +60,6 @@ export const submitOpportunityApplications = async (req: Request, res: Response)
     return res.status(201).json({ success: true, message: "Application Submitted" })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to submit applications"})
   } finally {
     client.release()
@@ -112,7 +111,6 @@ export const fetchOpportunityApplications = async (req: Request, res: Response) 
 
     return res.status(200).json({ success: true, data: applications })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to fetch applications" })
   }
 }
