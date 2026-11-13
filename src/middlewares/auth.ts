@@ -7,13 +7,19 @@ export const authMiddleware = async (req: Request, res: Response, next: Function
   const token = process.env.NODE_ENV === "production" 
     ? req.cookies.foundry_token 
     : req.header("Authorization");
+
+  const refreshToken = process.env.NODE_ENV === "production" 
+    ? req.cookies.foundry_refresh
+    : req.header("Refresh")
   
   if (!token) {
     return res.status(401).json({ success: false, message: "Unauthorized Access"})
   }
 
-  const isBlacklisted = await isBlacklist(token);
-  if (isBlacklisted) {
+  const isBlacklistedAccessToken = await isBlacklist(token);
+  const isBlacklistedRefreshToken = await isBlacklist(refreshToken);
+
+  if (isBlacklistedAccessToken || isBlacklistedRefreshToken) {
     return res.status(401).json({ success: false, message: "Invalid Token" })
   }
 
@@ -33,6 +39,7 @@ export const authMiddleware = async (req: Request, res: Response, next: Function
 
     req.user = rows[0];
     res.locals.token = token;
+    res.locals.refreshToken = refreshToken;
     next();
   } catch (err) {
     return res.status(401).json({ success: false, message: "Unauthorized Access" })
@@ -80,14 +87,22 @@ export const requireRefreshToken = async (req: Request, res: Response, next: Fun
 }
 
 export const optionalAuthMiddleware = async (req: Request, res: Response, next: Function) => {
-  const token = process.env.NODE_ENV === "production" ? req.cookies.foundry_token : req.header("Authorization");
+  const token = process.env.NODE_ENV === "production" 
+    ? req.cookies.foundry_token 
+    : req.header("Authorization");
+
+  const refreshToken = process.env.NODE_ENV === "production" 
+    ? req.cookies.foundry_refresh
+    : req.header("Refresh")
   
   if (!token) {
     return next();
   }
 
-  const isBlacklisted = await isBlacklist(token);
-  if (isBlacklisted) {
+  const isBlacklistedAccessToken = await isBlacklist(token);
+  const isBlacklistedRefreshToken = await isBlacklist(refreshToken);
+
+  if (isBlacklistedAccessToken || isBlacklistedRefreshToken) {
     return res.status(401).json({ success: false, message: "Invalid Token" })
   }
 

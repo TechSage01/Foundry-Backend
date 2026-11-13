@@ -25,7 +25,6 @@ export const issueCallbackToken = (req: Request, res: Response) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        path: "/api/auth/refresh",
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       })
 
@@ -71,7 +70,7 @@ export const renewAccessToken = async (req: Request, res: Response) => {
     if (oldAccessToken) {
       await blacklistToken(oldAccessToken);
     }
-    
+
     const token = signAccessToken(user.id);
 
     if (process.env.NODE_ENV === "production") {
@@ -101,11 +100,14 @@ export const renewAccessToken = async (req: Request, res: Response) => {
 // @access Authenticated users
 export const logout = async (req: Request, res: Response) => {
   const token = res.locals.token;
+  const refreshToken = res.locals.refreshToken;
 
   try {
     await blacklistToken(token) 
+    await blacklistToken(refreshToken)
 
     res.clearCookie("foundry_token")
+    res.clearCookie("foundry_refresh")
     
     return res.status(200).json({ success: true, message: "Logged out Successfully" })
   } catch (error) {
