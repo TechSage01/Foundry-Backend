@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { signToken } from "../utils/jwt.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
+import { blacklistToken } from "../service/redis.js";
 
 export const issueCallbackToken = (req: Request, res: Response) => {
   try {
@@ -14,7 +15,7 @@ export const issueCallbackToken = (req: Request, res: Response) => {
         httpOnly: true,
         secure: true,
         sameSite: "none",
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
+        maxAge: 30 * 60 * 1000 // 30 mins
       })
 
       return res.redirect(`${process.env.CLIENT_URL}/auth/callback`)
@@ -40,6 +41,23 @@ export const getMe = (req: Request, res: Response) => {
     return res.status(200).json({ success: true, message: "", data: user })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error"})
+  }
+}
+
+// @route POST /api/auth/logout
+// @desc Logout user
+// @access Authenticated users
+export const logout = async (req: Request, res: Response) => {
+  const token = res.locals.token;
+
+  try {
+    await blacklistToken(token) 
+
+    res.clearCookie("foundry_token")
+    
+    return res.status(200).json({ success: true, message: "Logged out Successfully" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to logout" })
   }
 }
 

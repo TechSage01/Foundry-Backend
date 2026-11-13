@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport.js"
-import { getMe, issueCallbackToken, signin } from "../controllers/auth.js";
+import { getMe, issueCallbackToken, logout, signin } from "../controllers/auth.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
 const router = Router();
@@ -8,6 +8,7 @@ const router = Router();
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 router.get("/github", passport.authenticate('github', { scope: ['user:email'], session: false}))
 router.get("/me", authMiddleware, getMe)
+router.post("/logout", authMiddleware, logout)
 
 router.get("/google/callback", 
   passport.authenticate('google', {

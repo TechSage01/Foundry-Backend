@@ -2,6 +2,7 @@ import http from "http";
 import app from "./app.js";
 import { initSocketServer } from "./socket/index.js";
 import pool from "./config/db.js";
+import redisClient from "./config/redis.js";
 
 // REST API
 const server = http.createServer(app);
@@ -13,6 +14,8 @@ const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
+    await redisClient.ping()
+
     const client = await pool.connect();
     await client.query('SELECT NOW()');
     client.release();
