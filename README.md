@@ -8,6 +8,8 @@
 | `GET`    | `/api/auth/google`              | Sign in with Google           |
 | `GET`    | `/api/auth/github`              | Sign in with GitHub           |
 | `GET`    | `/api/auth/me`                  | Fetch user                    |
+| `GET`    | `/api/auth/refresh`             | Renew Access Token            |
+| `POST`   | `/api/auth/logout`              | Logout current session        |
 
 
 ### profile
