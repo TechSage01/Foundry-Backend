@@ -53,7 +53,7 @@ export const getMe = (req: Request, res: Response) => {
       throw new Error("user not found")
     }
 
-    return res.status(200).json({ success: true, message: "", data: user })
+    return res.status(200).json({ success: true, data: user })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Internal Server Error"})
   }

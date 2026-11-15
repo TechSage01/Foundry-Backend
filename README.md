@@ -366,7 +366,37 @@ Creates a new post for the authenticated user.
 
 ---
 
+**`GET /api/posts`**
+
+Fetch public posts
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+| `tag` | `string` | No | null | Optional tag filtering |
+
 <br>
+
+---
+
+**`GET /api/posts/trending`**
+
+Fetch top trending posts
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `page` | `integer` | No | `1` | Page number for pagination |
+| `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+| `tag` | `string` | No | null | Optional tag filtering |
+
+<br>
+
+---
 
 **`PATCH /api/posts/:id`**
 

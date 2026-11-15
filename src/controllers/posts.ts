@@ -166,43 +166,122 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
   const userId = req.user?.id;
 
   const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+  const tag = req.query.tag;
 
   try {
     const { rows } = await pool.query(
-      `SELECT 
-         p.id,
-         p.title,
-         p.slug,
-         p.subtitle,
-         p.content,
-         p.media_url,
-         p.tags,
-         p.reading_time_minutes,
-         p.views_count,
-         p.created_at,
-         prof.username,
-         prof.full_name,
-         prof.avatar_url,
-         (SELECT COUNT(*)::INTEGER as likes_count FROM post_likes WHERE post_id = p.id),
-         (SELECT COUNT(*)::INTEGER as reposts_count FROM post_reposts WHERE post_id = p.id),
-         (SELECT COUNT(*)::INTEGER as comments_count FROM comments WHERE post_id = p.id),
-         EXISTS (
-          SELECT FROM post_reposts WHERE post_id = p.id AND user_id = $1
-         ) AS is_reposted,
-         EXISTS (
-          SELECT FROM post_likes WHERE post_id = p.id AND user_id = $1
-         ) AS is_liked
-       FROM posts p
-       JOIN profiles prof ON p.user_id = prof.user_id
-       WHERE p.is_published = true
-       ORDER BY p.created_at DESC
-       LIMIT $2`
-    , [
+     `SELECT 
+        p.id,
+        p.title,
+        p.slug,
+        p.subtitle,
+        p.content,
+        p.media_url,
+        p.tags,
+        p.reading_time_minutes,
+        p.views_count,
+        p.created_at,
+        prof.username,
+        prof.full_name,
+        prof.avatar_url,
+        (SELECT COUNT(*)::INTEGER FROM post_likes WHERE post_id = p.id) AS likes_count,
+        (SELECT COUNT(*)::INTEGER FROM post_reposts WHERE post_id = p.id) AS reposts_count,
+        (SELECT COUNT(*)::INTEGER FROM comments WHERE post_id = p.id) AS comments_count,
+        EXISTS (
+          SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1
+        ) AS is_reposted,
+        EXISTS (
+          SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1
+        ) AS is_liked
+      FROM posts p
+      JOIN profiles prof ON p.user_id = prof.user_id
+      WHERE p.is_published = true
+        AND ($4::TEXT IS NULL OR $4::TEXT = ANY(p.tags))
+      ORDER BY p.created_at DESC
+      LIMIT $2 OFFSET $3`,
+    [
       userId ?? null,
-      limit
+      limit,
+      offset,
+      tag
     ]);
 
-    return res.status(200).json({ success: true, data: rows })
+    return res.status(200).json({ 
+      success: true, 
+      count: rows.length,
+      page,
+      data: rows 
+    })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch posts" })
+  }
+}
+
+// @route GET /api/posts/trending
+// @desc get top trending posts
+// @access Public
+export const fetchTrendingPosts = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+
+  const limit = Math.min(parseInt(req.query.limit as string) || 10, 50);
+  const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+  const offset = (page - 1) * limit;
+
+  try {
+    const { rows } = await pool.query(`
+      WITH scored_posts AS (
+        SELECT 
+          p.id,
+          p.title,
+          p.slug,
+          p.subtitle,
+          p.content,
+          p.media_url,
+          p.tags,
+          p.reading_time_minutes,
+          p.views_count,
+          p.created_at,
+          prof.username,
+          prof.full_name,
+          prof.avatar_url,
+          (SELECT COUNT(*)::INTEGER FROM post_likes WHERE post_id = p.id) AS likes_count,
+          (SELECT COUNT(*)::INTEGER FROM post_reposts WHERE post_id = p.id) AS reposts_count,
+          (SELECT COUNT(*)::INTEGER FROM post_bookmarks WHERE post_id = p.id) AS bookmarks_count,
+          (SELECT COUNT(*)::INTEGER FROM comments WHERE post_id = p.id) AS comments_count,
+          EXISTS (
+            SELECT 1 FROM post_reposts WHERE post_id = p.id AND user_id = $1
+          ) AS is_reposted,
+          EXISTS (
+            SELECT 1 FROM post_likes WHERE post_id = p.id AND user_id = $1
+          ) AS is_liked,
+          EXISTS (
+            SELECT 1 FROM post_bookmarks WHERE post_id = p.id AND user_id = $1
+          ) AS is_bookmarked
+        FROM posts p
+        JOIN profiles prof ON p.user_id = prof.user_id
+        WHERE p.is_published = true
+      )
+      SELECT 
+        *,
+        (
+          (views_count * 1) +
+          (likes_count * 3) +
+          (bookmarks_count * 5) +
+          (reposts_count * 6)
+        ) / POWER(GREATEST(EXTRACT(EPOCH FROM (NOW() - created_at)) / 3600, 0) + 2, 1.5) AS trending_score
+      FROM scored_posts
+      ORDER BY trending_score DESC
+      LIMIT $2 OFFSET $3;
+    `, [userId ?? null, limit, offset])
+
+    return res.status(200).json({
+      success: true,
+      count: rows.length,
+      page,
+      data: rows
+    })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
   }
