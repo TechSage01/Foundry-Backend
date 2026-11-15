@@ -393,7 +393,6 @@ Fetch top trending posts
 | :--- | :--- | :--- | :--- | :--- |
 | `page` | `integer` | No | `1` | Page number for pagination |
 | `limit` | `integer` | No | `10` | Number of items per page (max 50) |
-| `tag` | `string` | No | null | Optional tag filtering |
 
 <br>
 

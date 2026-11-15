@@ -4,17 +4,18 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
 import passport from "./config/passport.js";
+import helmet from "helmet";
 import appRouter from "./routes/app.js";
-import authRouter from "./routes/auth.js"
-import profileRouter from "./routes/profile.js"
-import projectRouter from "./routes/projects.js"
-import experienceRouter from "./routes/experience.js"
-import opportunitiesRouter from "./routes/opportunities.js"
-import communitiesRouter from "./routes/community.js"
-import postRouter from "./routes/posts.js"
-import userRouter from "./routes/user.js"
-import conversationRouter from "./routes/conversation.js"
-import pool from "./config/db.js";
+import authRouter from "./routes/auth.js";
+import profileRouter from "./routes/profile.js";
+import projectRouter from "./routes/projects.js";
+import experienceRouter from "./routes/experience.js";
+import opportunitiesRouter from "./routes/opportunities.js";
+import communitiesRouter from "./routes/community.js";
+import postRouter from "./routes/posts.js";
+import userRouter from "./routes/user.js";
+import conversationRouter from "./routes/conversation.js";
+import notificationRouter from "./routes/notifications.js";
 import logger from "./middlewares/logger.js";
 import { globalLimiter, uploadLimiter } from "./middlewares/limiter.js";
 
@@ -23,6 +24,7 @@ const app = express();
 
 // middlewares
 app.set("trust proxy", 1)
+app.use(helmet())
 app.use((req, res, next) => {
   cors({
     origin: [process.env.CLIENT_URL!],
@@ -53,6 +55,7 @@ app.use("/api/users", userRouter)
 app.use("/api/opportunities", opportunitiesRouter)
 app.use("/api/communities", communitiesRouter)
 app.use("/api/conversations", conversationRouter)
+app.use("/api/notifications", notificationRouter)
 
 
 export default app;
