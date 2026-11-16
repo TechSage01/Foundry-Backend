@@ -560,7 +560,6 @@ export const togglePostLike = async (req: Request, res: Response) => {
     })
   } catch (error) {
     await client.query('ROLLBACK')
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to toggle project likes" })
   } finally {
     client.release()
