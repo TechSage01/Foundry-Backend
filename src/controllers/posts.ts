@@ -5,6 +5,7 @@ import { v4 as uuidv4, validate as isUuid } from "uuid";
 import { calculateReadingTime, shorten, slugify } from "../utils/helpers.js";
 import pool from "../config/db.js";
 import { AddNotification, NotificationPayload } from "../service/notification.js";
+import { attachContentBlocks } from "../utils/block.js";
 
 // @route POST /api/posts
 // @desc create a new posts
@@ -84,7 +85,9 @@ export const createPost = async (req: Request, res: Response) => {
       ]
     );
 
-    return res.status(200).json({ success: true, message: "Post Created", data: rows[0] })
+    const posts = await attachContentBlocks(rows);
+
+    return res.status(200).json({ success: true, message: "Post Created", data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to create post" })
   }
@@ -120,7 +123,9 @@ export const getMyPosts = async (req: Request, res: Response) => {
       [userId, limit]
     );
 
-    return res.status(200).json({ success: true, data: rows })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(200).json({ success: true, data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get posts" })
   }
@@ -154,7 +159,9 @@ export const getMyDrafts = async (req: Request, res: Response) => {
       [userId, limit]
     );
 
-    return res.status(200).json({ success: true, data: rows })
+    const posts = await attachContentBlocks(rows);
+
+    return res.status(200).json({ success: true, data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get drafts" })
   } 
@@ -209,11 +216,13 @@ export const getPublishedPosts = async (req: Request, res: Response) => {
       tag
     ]);
 
+    const posts = await attachContentBlocks(rows);
+
     return res.status(200).json({ 
       success: true, 
       count: rows.length,
       page,
-      data: rows 
+      data: posts
     })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
@@ -277,11 +286,13 @@ export const fetchTrendingPosts = async (req: Request, res: Response) => {
       LIMIT $2 OFFSET $3;
     `, [userId ?? null, limit, offset])
 
+    const posts = await attachContentBlocks(rows);
+
     return res.status(200).json({
       success: true,
       count: rows.length,
       page,
-      data: rows
+      data: posts
     })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
@@ -341,7 +352,9 @@ export const getUserPosts = async (req: Request, res: Response) => {
       LIMIT $2
     `, [userId, limit])
 
-    return res.status(200).json({ success: true, data: rows })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(200).json({ success: true, data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch user posts" })
   }
@@ -393,7 +406,9 @@ export const getPost = async (req: Request, res: Response) => {
       return res.status(404).json({ success: false, message: "Post not found or is unpublished" })
     }
 
-    return res.status(200).json({ success: true, data: rows[0] })
+    const posts = await attachContentBlocks(rows);
+
+    return res.status(200).json({ success: true, data: posts[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to get post" })
   }
@@ -442,7 +457,9 @@ export const fetchMyReposts = async (req: Request, res: Response) => {
       LIMIT $2 OFFSET $3
     `, [userId, limit, offset])
 
-    return res.status(200).json({ success: true, data: rows })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(200).json({ success: true, data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch posts" })
   }
@@ -745,7 +762,9 @@ export const updatePost = async (req: Request, res: Response) => {
       ]
     );
 
-    return res.status(200).json({ success: true, message: "Post Updated", data: rows[0] })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(200).json({ success: true, message: "Post Updated", data: posts[0] })
   } catch (error) { 
     return res.status(500).json({ success: false, message: "Failed to update post", error })
   }

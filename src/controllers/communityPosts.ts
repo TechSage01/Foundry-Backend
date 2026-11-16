@@ -5,6 +5,7 @@ import { createCommunityPostSchema } from "../schemas/community.js";
 import { uploadFile } from "../config/imagekit.js";
 import { buildCommentTree, calculateReadingTime, slugify } from "../utils/helpers.js";
 import { createCommentSchema } from "../schemas/post.js";
+import { attachContentBlocks } from "../utils/block.js";
 
 // @route POST /api/communities/:id/posts
 // @desc Create a new community post
@@ -81,7 +82,9 @@ export const createCommunityPost = async (req: Request, res: Response) => {
       readingTimeMins,
     ]);
 
-    return res.status(201).json({ success: true, message: "Post Created.", data: rows[0] })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(201).json({ success: true, message: "Post Created.", data: posts[0] })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to create community post" })
   }
@@ -131,7 +134,9 @@ export const fetchCommunityPosts = async (req: Request, res: Response) => {
       LIMIT $2 OFFSET $3
     `, [id, limit, offset])
 
-    return res.status(200).json({ success: true, data: rows })
+    const posts = await attachContentBlocks(rows)
+
+    return res.status(200).json({ success: true, data: posts })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch community post" })
   }
