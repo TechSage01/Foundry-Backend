@@ -76,6 +76,7 @@
 | `GET`    | `/api/posts/me/drafts`             | Fetch all owned posts drafts for a user          |
 | `GET`    | `/api/posts/{slug}`                | Get a single post                                |
 | `GET`    | `/api/posts/user/{username}`       | Fetch all posts associated with a username       |
+| `GET`    | `/api/posts/hashtags/suggest`      | Get live suggestion matching for posts tags      |
 | `PATCH`  | `/api/posts/{id}`                  | Update a post                                    |
 | `DELETE` | `/api/posts/{id}`                  | Delete a post                                    |
 | `POST`   | `/api/posts/{id}/likes`            | Toggle like status for a post                    |
@@ -412,6 +413,20 @@ Fetch top trending posts
 | :--- | :--- | :--- | :--- | :--- |
 | `page` | `integer` | No | `1` | Page number for pagination |
 | `limit` | `integer` | No | `10` | Number of items per page (max 50) |
+
+<br>
+
+---
+
+**`GET /api/posts/hashtags/suggest`**
+
+Get live suggestion matching for post hashtags
+
+**Query Parameters**
+
+| Parameter | Type | Required | Default | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `q` | `string` | Yes | null | Hashtag suggestion query |
 
 <br>
 

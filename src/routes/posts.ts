@@ -5,6 +5,7 @@ import { upload } from "../middlewares/upload.js";
 import { uploadLimiter } from "../middlewares/limiter.js";
 import { createComment, deleteComment, fetchComments, toggleCommentLike } from "../controllers/postComments.js";
 import { createPostBookmark, deletePostBookmark, getMyBookmarks } from "../controllers/postBookmarks.js";
+import { suggestHashtags } from "../controllers/hashtag.js";
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.get("/me", authMiddleware, getMyPosts)
 router.get("/me/drafts", authMiddleware, getMyDrafts)
 router.get("/me/bookmarks", authMiddleware, getMyBookmarks)
 router.get("/me/reposts", authMiddleware, fetchMyReposts)
+router.get("/hashtags/suggest", authMiddleware, suggestHashtags)
 
 // Public
 router.get("/", optionalAuthMiddleware, getPublishedPosts)
