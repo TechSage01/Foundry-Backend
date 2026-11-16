@@ -161,6 +161,25 @@
 | `GET`    | `/api/conversations/{id}/requests`               | Fetch group pending requests                     |
 | `PATCH`  | `/api/conversations/{id}/requests/{applicantId}` | Review pending request                           |
 
+### notifications
+
+| Method   | Endpoint                   | Description                  |
+| -------- | -------------------------- | ---------------------------- |
+| `GET`    | `/api/notifications`       | Fetch notifications          |
+| `PATCH`  | `/api/notifications/{id}`  | Mark notification as read    | 
+
+<br>
+
+### Notification Response
+
+| Field         | Description                                                                    |
+| ------------- | -----------------------------------------------------------------------------  |
+| `id`          | Notification Id <used for marking as read>                                     |
+| `actor_id`    | Id of the user that initiated the action                                       | 
+| `entity_type` | Notification type <e.g follow, post_like e.t.c>                                |
+| `entity_id`   | Id of the notification type                                                    |
+| `metadata`    | entity & actor metadata for rendition <e.g username, full_name, post_comment>  |
+
 <br>
 
 ## Real-time WebSockets (Conversations)
