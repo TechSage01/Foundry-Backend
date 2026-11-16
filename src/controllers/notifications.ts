@@ -10,6 +10,7 @@ export const getNotifications = async (req: Request, res: Response) => {
 
   try {
     const { rows } = await pool.query(`
+      WITH unread AS (
       SELECT 
         id, 
         actor_id,
@@ -18,8 +19,29 @@ export const getNotifications = async (req: Request, res: Response) => {
         metadata,
         is_read,
         created_at
-      FROM notifications 
-      WHERE recipent_id = $1
+      FROM notifications
+      WHERE recipent_id = $1 AND is_read = false
+      ORDER BY created_at DESC
+      LIMIT 60
+    ),
+    read AS (
+      SELECT 
+        id, 
+        actor_id,
+        entity_type,
+        entity_id,
+        metadata,
+        is_read,
+        created_at
+      FROM notifications
+      WHERE recipent_id = $1 AND is_read = true
+      ORDER BY created_at DESC
+      LIMIT GREATEST(0, LEAST(5, 60 - (SELECT COUNT(*) FROM unread)))
+    )
+    SELECT * FROM unread
+    UNION ALL
+    SELECT * FROM read
+    ORDER BY is_read ASC, created_at DESC;
     `, [userId])
 
     return res.status(200).json({ success: true, data: rows })

@@ -467,7 +467,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
 
     // verify post existence
     const postCheck = await client.query(`
-      SELECT id, content FROM posts WHERE id = $1
+      SELECT id, user_id, content FROM posts WHERE id = $1
     `, [id])
 
     if (postCheck.rows.length === 0) {
@@ -478,19 +478,6 @@ export const togglePostLike = async (req: Request, res: Response) => {
     const likedCheck = await client.query(`
       SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2
     `, [id, userId])
-
-    // get post author
-    const authorRes = await client.query(`
-      SELECT 
-        prof.user_id
-      FROM profiles prof
-      JOIN posts ON prof.user_id = posts.user_id
-      WHERE posts.id = $1 
-    `, [id])
-
-    if (authorRes.rows.length === 0) {
-      return res.status(500).json({ success: false, message: "Failed to get author details" })
-    }
 
     // get actor details
     const actorRes = await client.query(`
@@ -508,7 +495,6 @@ export const togglePostLike = async (req: Request, res: Response) => {
 
     let isLiked = false;
 
-    const author = authorRes.rows[0];
     const actor = actorRes.rows[0];
 
     if (likedCheck.rows.length > 0) {
@@ -526,7 +512,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
 
       // create notifications asynchronously
       const notification: NotificationPayload = {
-        recipentId: author.user_id,
+        recipentId: postCheck.rows[0].user_id,
         actorId: userId!,
         entityType: "post_like",
         entityId: id as string,

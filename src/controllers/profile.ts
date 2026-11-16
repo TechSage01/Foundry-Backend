@@ -15,7 +15,7 @@ export const fetchUsers = async (req: Request, res: Response) => {
   const offset = (page - 1) * limit;
 
   try {
-    const searchTerm = `%${q.toLowerCase().trim()}%`;
+    const searchTerm = q ? `%${q.toLowerCase().trim()}%` : "";
 
     const { rows } = await pool.query(`
       SELECT

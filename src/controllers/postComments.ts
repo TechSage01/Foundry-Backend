@@ -2,8 +2,8 @@ import { Request, Response } from "express";
 import { v4 as uuidv4, validate as isUuid } from "uuid"
 import pool from "../config/db.js";
 import { createCommentSchema } from "../schemas/post.js";
-import { buildCommentTree } from "../utils/helpers.js";
-import { json, success } from "zod";
+import { buildCommentTree, shorten } from "../utils/helpers.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
 
 // @route POST /api/posts/:id/comments
 // @desc  create a post comment
@@ -30,7 +30,7 @@ export const createComment = async (req: Request, res: Response) => {
   try {
     // verify existence
     const postCheck = await pool.query(`
-      SELECT id FROM posts WHERE id = $1
+      SELECT id, user_id, content FROM posts WHERE id = $1
     `, [id])
 
     if (postCheck.rows.length === 0) {
@@ -63,6 +63,23 @@ export const createComment = async (req: Request, res: Response) => {
       parent_id ?? null,
       content
     ])
+
+    // create notification asynchronously
+    const notification: NotificationPayload = {
+      recipentId: postCheck.rows[0].user_id,
+      actorId: userId!,
+      entityType: "post_comment",
+      entityId: id as string,
+      metadata: {
+        post_content: postCheck.rows[0].content,
+        post_comment: shorten(content),
+        full_name: user.full_name,
+        username: user.username,
+        avatar_url: user.avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(201).json({ success: true, message: "Comment Created" })
   } catch (error) {
