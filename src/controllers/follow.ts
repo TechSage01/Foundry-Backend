@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { validate as isUuid } from "uuid";
 import pool from "../config/db.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
 
 // @route POST /api/users/:username/follow
 // @desc follow a user
@@ -25,6 +25,21 @@ export const followUser = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, message: "You cannot follow yourself." })
     }
 
+    const actorRes = await pool.query(`
+      SELECT
+        full_name,
+        username,
+        avatar_url
+      FROM profiles
+      WHERE user_id = $1
+    `, [followerId])
+
+    if (actorRes.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get actor details" })
+    }
+
+    const actor = actorRes.rows[0];
+
     const { rowCount } = await pool.query(
       `INSERT INTO follows (follower_id, following_id)
        VALUES ($1, $2)
@@ -35,6 +50,21 @@ export const followUser = async (req: Request, res: Response) => {
     if (rowCount === 0) {
       return res.status(400).json({ success: false, message: "You are already following this user" });
     }
+
+    // create notification asynchronously
+    const notification: NotificationPayload = {
+      recipentId: followingId,
+      actorId: followerId!,
+      entityType: "follow",
+      entityId: null,
+      metadata: {
+        full_name: actor.full_name,
+        username: actor.username,
+        avatar_url: actor.avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(201).json({ success: true, message: "User followed successfully" })
   } catch (error) {
@@ -62,6 +92,22 @@ export const unFollowUser = async (req: Request, res: Response) => {
 
     const followingId = user.rows[0].user_id;
 
+    const actorRes = await pool.query(`
+      SELECT
+        full_name,
+        username,
+        avatar_url
+      FROM profiles
+      WHERE user_id = $1
+    `, [followerId])
+
+    if (actorRes.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get actor details" })
+    }
+
+    const actor = actorRes.rows[0];
+
+
     const { rowCount } = await pool.query(
       `DELETE FROM follows WHERE follower_id = $1 AND following_id = $2`,
       [followerId, followingId]
@@ -70,6 +116,21 @@ export const unFollowUser = async (req: Request, res: Response) => {
     if (rowCount === 0) {
       return res.status(400).json({ success: false, message: "You are not following this user" });
     }
+
+    // create notification asynchronously
+    const notification: NotificationPayload = {
+      recipentId: followingId,
+      actorId: followerId!,
+      entityType: "unfollow",
+      entityId: null,
+      metadata: {
+        full_name: actor.full_name,
+        username: actor.username,
+        avatar_url: actor.avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(200).json({ success: true, message: "User unfollowed successfully" });
   } catch (error) {

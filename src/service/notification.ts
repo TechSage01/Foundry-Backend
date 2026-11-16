@@ -5,7 +5,7 @@ export interface NotificationPayload {
   recipentId: string,
   actorId: string,
   entityType: string,
-  entityId: string,
+  entityId: string | null,
   metadata: Record<string, any>
 }
 
@@ -22,7 +22,7 @@ export const AddNotification = (payload: NotificationPayload) => {
         WHERE recipent_id = $2::UUID
           AND actor_id = $3::UUID
           AND entity_type = $4::VARCHAR
-          AND entity_id = $5::UUID
+          AND entity_id IS NOT DISTINCT FROM $5::UUID
           AND created_at > NOW() - INTERVAL '24 hours'
       )
   `, [
@@ -30,7 +30,7 @@ export const AddNotification = (payload: NotificationPayload) => {
     payload.recipentId,
     payload.actorId,
     payload.entityType,
-    payload.entityId,
+    payload.entityId ?? null,
     payload.metadata
   ])
 }

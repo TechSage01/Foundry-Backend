@@ -5,7 +5,6 @@ import { v4 as uuidv4, validate as isUuid } from "uuid";
 import { calculateReadingTime, shorten, slugify } from "../utils/helpers.js";
 import pool from "../config/db.js";
 import { AddNotification, NotificationPayload } from "../service/notification.js";
-import { getIO } from "../socket/index.js";
 
 // @route POST /api/posts
 // @desc create a new posts
