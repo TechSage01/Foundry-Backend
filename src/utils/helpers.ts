@@ -27,6 +27,19 @@ export const calculateReadingTime = (content: string): number => {
   return Math.max(1, Math.ceil(wordCount / wordsPerMinute));
 };
 
+export const shorten = (text: string): string => {
+  const maxLength = 20;
+
+  const cleaned = text.replace(/\s+/g, " ").trim();
+  if (cleaned.length <= maxLength) return cleaned;
+
+  const truncated = cleaned.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  const safeCut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+
+  return `${safeCut.trimEnd()}...`;
+}
+
 export const buildCommentTree = (flatComments: any[]): CommentNode[] => {
   const map = new Map<string, CommentNode>();
   const rootComment: CommentNode[] = [];

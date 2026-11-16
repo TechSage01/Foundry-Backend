@@ -2,8 +2,10 @@ import { Request, Response } from "express";
 import { createPostSchema, updatePostSchema } from "../schemas/post.js";
 import { uploadFile } from "../config/imagekit.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
-import { calculateReadingTime, slugify } from "../utils/helpers.js";
+import { calculateReadingTime, shorten, slugify } from "../utils/helpers.js";
 import pool from "../config/db.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
+import { getIO } from "../socket/index.js";
 
 // @route POST /api/posts
 // @desc create a new posts
@@ -465,7 +467,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
 
     // verify post existence
     const postCheck = await client.query(`
-      SELECT id FROM posts WHERE id = $1
+      SELECT id, content FROM posts WHERE id = $1
     `, [id])
 
     if (postCheck.rows.length === 0) {
@@ -477,11 +479,40 @@ export const togglePostLike = async (req: Request, res: Response) => {
       SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2
     `, [id, userId])
 
+    // get post author
+    const authorRes = await client.query(`
+      SELECT 
+        prof.user_id
+      FROM profiles prof
+      JOIN posts ON prof.user_id = posts.user_id
+      WHERE posts.id = $1 
+    `, [id])
+
+    if (authorRes.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get author details" })
+    }
+
+    // get actor details
+    const actorRes = await client.query(`
+      SELECT
+        full_name,
+        username,
+        avatar_url
+      FROM profiles
+      WHERE user_id = $1
+    `, [userId])
+
+     if (actorRes.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get actor details" })
+    }
+
     let isLiked = false;
+
+    const author = authorRes.rows[0];
+    const actor = actorRes.rows[0];
 
     if (likedCheck.rows.length > 0) {
       // delete like
-
       await client.query(`
         DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2
       `, [id, userId])
@@ -489,10 +520,25 @@ export const togglePostLike = async (req: Request, res: Response) => {
       isLiked = false;
     } else {
       // create like
-
       await client.query(`
         INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)
       `, [id, userId])
+
+      // create notifications asynchronously
+      const notification: NotificationPayload = {
+        recipentId: author.user_id,
+        actorId: userId!,
+        entityType: "post_like",
+        entityId: id as string,
+        metadata: {
+          post_content: shorten(postCheck.rows[0].content),
+          username: actor.username,
+          full_name: actor.full_name,
+          avatar_url: actor.avatar_url 
+        }
+      }
+      
+      AddNotification(notification)
 
       isLiked = true
     }
@@ -514,6 +560,7 @@ export const togglePostLike = async (req: Request, res: Response) => {
     })
   } catch (error) {
     await client.query('ROLLBACK')
+    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to toggle project likes" })
   } finally {
     client.release()

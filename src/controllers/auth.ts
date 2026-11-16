@@ -116,9 +116,9 @@ export const logout = async (req: Request, res: Response) => {
 }
 
 export const signin = async (req: Request, res: Response, next: Function) => {
-  const { email } = req.body;
-  if (!email || email == "") {
-    return res.status(400)
+  const { email, name } = req.body;
+  if (!email || email == "" || !name || name == "") {
+    return res.status(400).json({ error: "body incomplete" })
   }
   
   const client = await pool.connect();
@@ -147,12 +147,12 @@ export const signin = async (req: Request, res: Response, next: Function) => {
       RETURNING id, email, verified
     `, [userId, req.body.email])
 
-    const username = `habeebamoo_${Math.floor(1000 + Math.random() * 9000)}`;
+    const username = `${name}_${Math.floor(1000 + Math.random() * 9000)}`;
 
     await client.query(`
       INSERT INTO profiles (user_id, full_name, username, avatar_url)
       VALUES ($1, $2, $3, $4)
-    `, [userId, "Habeeb", username, "https://google.com"]);
+    `, [userId, name, username, "https://google.com"]);
 
     await client.query('COMMIT');
     
