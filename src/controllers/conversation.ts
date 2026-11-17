@@ -7,6 +7,7 @@ import crypto from "crypto";
 import { formatDateFull, formatTimeOnly } from "../utils/helpers.js";
 import { getIO } from "../socket/index.js";
 import { getRoomName } from "../socket/utils.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -439,7 +440,7 @@ export const joinConversation = async (req: Request, res: Response) => {
 
   try {
     const convResult = await pool.query(`
-      SELECT id, name join_policy FROM conversations WHERE invite_link = $1
+      SELECT id, name, join_policy FROM conversations WHERE invite_link = $1
     `, [code])
 
     if (convResult.rows.length === 0) {
@@ -471,6 +472,31 @@ export const joinConversation = async (req: Request, res: Response) => {
 
     const initialStatus = conv.join_policy === "approval_required" ? "pending" : "active";
 
+    // fetch convo details
+    const adminRes = await pool.query(`
+      SELECT 
+        c.name,
+        cm.user_id,
+        cm.role
+      FROM conversations c
+      JOIN conversation_members cm ON c.id = cm.conversation_id
+      WHERE c.id = $1 AND cm.role IN ('owner', 'admin')
+    `, [conv.id])
+
+    if (adminRes.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get conv details" })
+    }
+
+    // fetch user details
+    const actorRes = await pool.query(`
+      SELECT
+        full_name,
+        username,
+        avatar_url
+      FROM profiles
+      WHERE user_id = $1
+    `, [userId])
+
     await pool.query(`
       INSERT INTO conversation_members 
         (conversation_id, user_id, role, status, last_read_at)
@@ -478,6 +504,26 @@ export const joinConversation = async (req: Request, res: Response) => {
       ON CONFLICT (conversation_id, user_id)
       DO UPDATE SET status = EXCLUDED.status
     `, [conv.id, userId, initialStatus])
+
+    if (initialStatus === "pending") {
+      // create notification asynchronously
+      for (const admin of adminRes.rows) {
+        const notification: NotificationPayload = {
+          recipentId: admin.user_id,
+          actorId: userId!,
+          entityType: "conversation_request",
+          entityId: conv.id,
+          metadata: {
+            conversation_name: admin.name,
+            full_name: actorRes.rows[0].full_name,
+            username: actorRes.rows[0].username,
+            avatar_url: actorRes.rows[0].avatar_url
+          }
+        }
+
+        AddNotification(notification)
+      }
+    }
 
     return res.status(initialStatus === "pending" ? 202 : 200).json({
       success: true,
@@ -488,6 +534,7 @@ export const joinConversation = async (req: Request, res: Response) => {
       })
     })
   } catch (error) {
+    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to join Group" })
   }
 }
@@ -561,8 +608,16 @@ export const reviewPendingRequets = async (req: Request, res: Response) => {
 
   try {
     const adminCheck = await pool.query(`
-      SELECT role FROM conversation_members
-      WHERE conversation_id = $1 AND user_id = $2 AND role IN ('owner', 'admin') AND status = 'active'
+      SELECT
+        c.name, 
+        c.icon_url,
+        cm.role 
+      FROM conversations c 
+      JOIN conversation_members cm ON c.id = cm.conversation_id
+      WHERE cm.conversation_id = $1 
+        AND cm.user_id = $2 
+        AND cm.role IN ('owner', 'admin') 
+        AND status = 'active'
     `, [id, userId])
 
     if (adminCheck.rows.length === 0) {
@@ -581,6 +636,20 @@ export const reviewPendingRequets = async (req: Request, res: Response) => {
       console.log(rows)
       return res.status(404).json({ success: false, message: "Pending request not found" })
     }
+
+    // create notification asynchronously
+    const notification: NotificationPayload = {
+      recipentId: applicantId as string,
+      actorId: userId!,
+      entityType: action === "approve" ? "conversation_approved" : "conversation_rejected",
+      entityId: id as string,
+      metadata: {
+        conversation_name: adminCheck.rows[0].name,
+        conversation_icon_url: adminCheck.rows[0].icon_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(200).json({
       success: true,

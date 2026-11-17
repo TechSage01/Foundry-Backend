@@ -1,2 +1,7 @@
-enforce offset
-pentest all endpoints
+post_like
+post_comment
+follow
+unfollow
+--- mentions
+conversation_request
+conversation_approved | conversation_rejected
