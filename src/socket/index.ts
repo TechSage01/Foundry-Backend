@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { AuthSocket, socketMiddleware } from "../middlewares/socketAuth.js";
 import { registerRoomHandlers } from "./handlers/room.js";
 import { registerTypingHandlers } from "./handlers/typing.js";
+import { registerNotificationHandler } from "./handlers/notification.js";
 
 let io: Server;
 
@@ -18,11 +19,16 @@ export const initSocketServer = (httpServer: HTTPServer): Server => {
 
   io.on("connection", (socket) => {
     const authSocket = socket as AuthSocket;
+    const userId = authSocket.data.user.id;
+    
     console.log(`[SOCKET CONNECTED]`)
+
+    authSocket.join(`user:${userId}`)
 
     // handlers
     registerRoomHandlers(authSocket)
     registerTypingHandlers(authSocket)
+    registerNotificationHandler(authSocket)
 
     authSocket.on("disconnect", (reason) => {
       console.log(`[SOCKET DISCONNECTED] Reason: ${reason}`)

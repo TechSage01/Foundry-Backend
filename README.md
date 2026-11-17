@@ -195,6 +195,8 @@
 | `typing:display`      |                   | Server &rarr; Client  | Server broadcasting user typing                  |
 | `typing:stop`         | `conversationId`  | Client &rarr; Server  | Stop notifying the channel on user typing state  |
 | `conversation:read`   |                   | Server &rarr; Client  | A user just read the latest messages             |
+| `notification:new`    |                   | Server &rarr; Client  | New notification                                 |
+| `notification:read`   | `notificationId`  | Client &rarr; Server  | Mark a notification as read                      |
 | `error`               |                   | Server &rarr; Client  | Operation failed                                 |
 
 <br><br>

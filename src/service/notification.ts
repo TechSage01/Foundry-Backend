@@ -1,5 +1,6 @@
 import pool from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
+import { getIO } from "../socket/index.js";
 
 export interface NotificationPayload {
   recipentId: string,
@@ -9,10 +10,10 @@ export interface NotificationPayload {
   metadata: Record<string, any>
 }
 
-export const AddNotification = (payload: NotificationPayload) => {
+export const AddNotification = async (payload: NotificationPayload) => {
   const notificationId = uuidv4();
 
-  pool.query(`
+  const { rows } = await pool.query(`
     INSERT INTO notifications
       (id, recipent_id, actor_id, entity_type, entity_id, metadata)
     SELECT $1::UUID, $2::UUID, $3::UUID, $4::VARCHAR, $5::UUID, $6::JSONB
@@ -32,5 +33,12 @@ export const AddNotification = (payload: NotificationPayload) => {
     payload.entityType,
     payload.entityId ?? null,
     payload.metadata
-  ])
+  ]);
+
+  const inserted = rows[0];
+  if (!inserted) return
+
+  getIO()
+    .to(`user:${payload.recipentId}`)
+    .emit("notification:new", inserted)
 }
