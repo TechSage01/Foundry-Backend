@@ -739,6 +739,7 @@ Fetch message history for a conversation.
 | `post_repost`           | When any of the user's posts is reposted                                 |
 | `follow`                | When the user has a new follower                                         | 
 | `unfollow`              | When the user has an unfollow                                            | 
+| `message_mention`       | Whenever the user is tagged e.g @username in a conversation              |
 | `conversation_request`  | Admin notif when someone submits a request to join a conversation group  |
 | `conversation_approved` | When the user's conversation request has been approved                   | 
 | `conversation_rejected` | When the user's conversation request has been rejected                   |

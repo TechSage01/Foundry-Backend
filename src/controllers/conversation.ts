@@ -8,6 +8,7 @@ import { formatDateFull, formatTimeOnly } from "../utils/helpers.js";
 import { getIO } from "../socket/index.js";
 import { getRoomName } from "../socket/utils.js";
 import { AddNotification, NotificationPayload } from "../service/notification.js";
+import { notifyMentions } from "../service/mentions.js";
 
 // @route POST /api/conversations/messages
 // @desc start a new conversation
@@ -119,6 +120,15 @@ export const createMessage = async (req: Request, res: Response) => {
     getIO()
       .to(getRoomName(conversation_id!))
       .emit("message:new", newMessage)
+
+      
+    // create notif asynchronously
+    notifyMentions({
+      id: messageId,
+      conversation_id: targetConversationId!,
+      sender_id: userId!,
+      content: content || null
+    })
 
     // UPDATE read stamps
     await client.query(`

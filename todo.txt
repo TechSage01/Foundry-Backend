@@ -3,7 +3,7 @@ post_comment
 post_repost
 follow
 unfollow
---- mentions
+message_mention
 conversation_request
 conversation_approved | conversation_rejected
 community_join
