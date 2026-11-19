@@ -28,7 +28,7 @@ export const calculateReadingTime = (content: string): number => {
 };
 
 export const shorten = (text: string): string => {
-  const maxLength = 20;
+  const maxLength = 50;
 
   const cleaned = text.replace(/\s+/g, " ").trim();
   if (cleaned.length <= maxLength) return cleaned;

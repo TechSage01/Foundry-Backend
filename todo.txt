@@ -5,3 +5,6 @@ unfollow
 --- mentions
 conversation_request
 conversation_approved | conversation_rejected
+community_join
+community_post
+community_comment

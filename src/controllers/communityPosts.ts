@@ -3,9 +3,10 @@ import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 import { createCommunityPostSchema } from "../schemas/community.js";
 import { uploadFile } from "../config/imagekit.js";
-import { buildCommentTree, calculateReadingTime, slugify } from "../utils/helpers.js";
+import { buildCommentTree, calculateReadingTime, shorten, slugify } from "../utils/helpers.js";
 import { createCommentSchema } from "../schemas/post.js";
 import { attachContentBlocks } from "../utils/block.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
 
 // @route POST /api/communities/:id/posts
 // @desc Create a new community post
@@ -39,7 +40,7 @@ export const createCommunityPost = async (req: Request, res: Response) => {
   try {
     // verify community existence
     const communityCheck = await pool.query(`
-      SELECT id FROM communities WHERE id = $1
+      SELECT id, name FROM communities WHERE id = $1
     `, [id])
 
     if (communityCheck.rows.length === 0) {
@@ -53,6 +54,24 @@ export const createCommunityPost = async (req: Request, res: Response) => {
 
     if (membershipCheck.rows.length === 0) {
       return res.status(403).json({ success: false, message: "You must be a member to post in this community" })
+    }
+
+    // get members
+    const members = await pool.query(`
+      SELECT user_id FROM community_members WHERE community_id = $1 AND user_id != $2
+    `, [id, userId])
+
+    if (members.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get community members details" })
+    }
+
+    const actor = await pool.query(`
+      SELECT full_name, username, avatar_url
+      FROM profiles WHERE user_id = $1
+    `, [userId])
+
+    if (actor.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get user details" })
     }
 
     const mediaUrls: string[] = await Promise.all(
@@ -81,6 +100,25 @@ export const createCommunityPost = async (req: Request, res: Response) => {
       mediaUrls,
       readingTimeMins,
     ]);
+
+    // create notifs asynchronously
+    for (const member of members.rows) {
+      const notification: NotificationPayload = {
+        recipentId: member.user_id,
+        actorId: userId!,
+        entityType: "community_post",
+        entityId: id as string,
+        metadata: {
+          community_name: communityCheck.rows[0].name,
+          post_content: shorten(content),
+          full_name: actor.rows[0].full_name,
+          username: actor.rows[0].username,
+          avatar_url: actor.rows[0].avatar_url
+        }
+      } 
+
+      AddNotification(notification)
+    }
 
     const posts = await attachContentBlocks(rows)
 
@@ -171,7 +209,7 @@ export const createCommunityPostComments = async (req: Request, res: Response) =
 
     // verify community existence
     const communityCheck = await client.query(`
-      SELECT id FROM communities WHERE id = $1
+      SELECT id, name FROM communities WHERE id = $1
     `, [id])
 
     if (communityCheck.rows.length === 0) {
@@ -180,7 +218,7 @@ export const createCommunityPostComments = async (req: Request, res: Response) =
 
     // verify community posts existence
     const postCheck = await client.query(`
-      SELECT 1 FROM community_posts WHERE community_id = $1 AND id = $2
+      SELECT author_id, content FROM community_posts WHERE community_id = $1 AND id = $2
     `, [id, postId])
 
     if (postCheck.rows.length === 0) {
@@ -212,6 +250,25 @@ export const createCommunityPostComments = async (req: Request, res: Response) =
     ])
 
     await client.query('COMMIT')
+
+    // create notif asynchronously
+    const notification: NotificationPayload = {
+      recipentId: postCheck.rows[0].author_id,
+      actorId: userId!,
+      entityType: "community_comment",
+      entityId: id as string,
+      metadata: {
+        community_name: communityCheck.rows[0].name,
+        post_id: postId,
+        post_content: shorten(postCheck.rows[0].content),
+        comment_content: shorten(content),
+        full_name: user.full_name,
+        username: user.username,
+        avatar_url: user.avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(201).json({ success: true, message: "Comment Created" })
   } catch (error) {

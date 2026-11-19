@@ -4,6 +4,7 @@ import { uploadFile } from "../config/imagekit.js";
 import { v4 as uuidv4, validate as isUuid } from "uuid";
 import pool from "../config/db.js";
 import { slugify } from "../utils/helpers.js";
+import { AddNotification, NotificationPayload } from "../service/notification.js";
 
 // @route POST /api/communities
 // @desc create a new community
@@ -281,11 +282,21 @@ export const joinCommunity = async (req: Request, res: Response) => {
   try {
     // check
     const check = await pool.query(`
-      SELECT id FROM communities WHERE id = $1
+      SELECT id, owner_id, name FROM communities WHERE id = $1
     `, [id])
 
     if (check.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Community Not Found" })
+    }
+
+    // fetch actor details
+    const actor = await pool.query(`
+      SELECT full_name, username, avatar_url
+      FROM profiles WHERE user_id = $1
+    `, [userId])
+
+    if (actor.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get user details" })
     }
 
     const { rowCount } = await pool.query(`
@@ -301,6 +312,22 @@ export const joinCommunity = async (req: Request, res: Response) => {
         message: "You are already a member of this community"
       })
     }
+
+    // create notif asynchronously
+    const notification: NotificationPayload = {
+      recipentId: check.rows[0].owner_id,
+      actorId: userId!,
+      entityType: "community_join",
+      entityId: id as string,
+      metadata: {
+        community_name: check.rows[0].name,
+        full_name: actor.rows[0].full_name,
+        username: actor.rows[0].username,
+        avatar_url: actor.rows[0].avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(201).json({ success: true, message: "Successfully joined the community"})
   } catch (error) {
