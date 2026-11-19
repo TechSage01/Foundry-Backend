@@ -28,7 +28,6 @@ export const createPost = async (req: Request, res: Response) => {
 
   const validation = createPostSchema.safeParse(payload)
   if (!validation.success) {
-    console.log(validation.data)
     return res.status(400).json({ success: false, message: "Invalid Request", errors: validation.error.flatten().fieldErrors })
   }
 
@@ -582,7 +581,7 @@ export const createRepost = async (req: Request, res: Response) => {
   try {
     // verify post existence
     const postCheck = await pool.query(`
-      SELECT id FROM posts WHERE id = $1
+      SELECT id, user_id, content FROM posts WHERE id = $1
     `, [id])
 
     if (postCheck.rows.length === 0) {
@@ -597,10 +596,36 @@ export const createRepost = async (req: Request, res: Response) => {
       return res.status(200).json({ success: true, message: "Post Reposted"})
     }
 
+    // get actor details 
+    const actor = await pool.query(`
+      SELECT full_name, username, avatar_url
+      FROM profiles WHERE user_id = $1
+    `, [userId])
+
+    if (actor.rows.length === 0) {
+      return res.status(500).json({ success: false, message: "Failed to get user details" })
+    }
+
     // create post
     await pool.query(`
       INSERT INTO post_reposts (post_id, user_id) VALUES ($1, $2)
     `, [id, userId])
+
+    // create notifs asynchronously
+    const notification: NotificationPayload = {
+      recipentId: postCheck.rows[0].user_id,
+      actorId: userId!,
+      entityType: "post_repost",
+      entityId: id as string,
+      metadata: {
+        post_content: shorten(postCheck.rows[0].content),
+        full_name: actor.rows[0].full_name,
+        username: actor.rows[0].username,
+        avatar_url: actor.rows[0].avatar_url
+      }
+    }
+
+    AddNotification(notification)
 
     return res.status(201).json({ 
       success: true, 

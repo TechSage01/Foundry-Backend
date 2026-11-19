@@ -534,7 +534,6 @@ export const joinConversation = async (req: Request, res: Response) => {
       })
     })
   } catch (error) {
-    console.error(error)
     return res.status(500).json({ success: false, message: "Failed to join Group" })
   }
 }
@@ -633,7 +632,6 @@ export const reviewPendingRequets = async (req: Request, res: Response) => {
     `, [newStatus, id, applicantId])
 
     if (rowCount === 0) {
-      console.log(rows)
       return res.status(404).json({ success: false, message: "Pending request not found" })
     }
 

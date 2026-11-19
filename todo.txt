@@ -1,5 +1,6 @@
 post_like
 post_comment
+post_repost
 follow
 unfollow
 --- mentions
