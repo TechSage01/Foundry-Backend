@@ -728,4 +728,50 @@ Fetch message history for a conversation.
 }
 ```
 
+<br>
+
+---
+
+## Json Blocks Response
+
+Posts responses in json format
+
+```json
+{
+  "type": "text",
+  "content": "This is a test post",
+  "isHashtag": false,
+  "hashtagType": null
+}, {
+  "type": "hashtag",
+  "content": "#david003",
+  "isHashtag": true,
+  "hashtagType": "username",
+  "target": {
+    "id": "8wbw6y2h2ns-2i2nnd-02dndd",
+    "slug": "david003",
+    "href": "/david003",
+  }
+}, {
+  "type": "hashtag",
+  "content": "#rust-club",
+  "isHashtag": true,
+  "hashtagType": "community",
+  "target": {
+    "id": "6eyehd7kw-8w67w-huw99",
+    "slug": "rust-club_908",
+    "href": "/communities/rust-club_908",
+  },
+}, {
+  "type": "hashtag",
+  "content": "#javaprogramming",
+  "isHashtag": true,
+  "hashtagType": "tag",
+  "target": {
+    "slug": "javaprogramming",
+    "href": "/?tag=javaprogramming",
+  },
+}
+```
+
 
