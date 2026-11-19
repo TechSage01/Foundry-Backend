@@ -728,9 +728,25 @@ Fetch message history for a conversation.
 }
 ```
 
-<br>
+<br><br>
 
----
+### Notification responses (entity types)
+
+| Entity                  | Action                                                                   |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `post_like`             | When any of the user's posts is liked                                    |
+| `post_comment`          | When any of the user's posts is commented on                             |
+| `post_repost`           | When any of the user's posts is reposted                                 |
+| `follow`                | When the user has a new follower                                         | 
+| `unfollow`              | When the user has an unfollow                                            | 
+| `conversation_request`  | Admin notif when someone submits a request to join a conversation group  |
+| `conversation_approved` | When the user's conversation request has been approved                   | 
+| `conversation_rejected` | When the user's conversation request has been rejected                   |
+| `community_join`        | Admin notif when a new user joins their community                        |
+| `community_post`        | All members notifs whenever a member drops a new post                    |
+| `community_comment`     | Post author notif when someone comments on their community posts         |
+
+<br><br>
 
 ## Json Blocks Response
 
