@@ -208,7 +208,7 @@ export const createConversation = async (req: Request, res: Response) => {
       message: `${type === "group" ? "Group" : "Project"} conversation created`,
       data: {
         ...rows[0],
-        invite_link: `/messages/join/${inviteCode}`
+        invite_code: inviteCode
       }
     })
   } catch (error) {
@@ -240,7 +240,10 @@ export const getConversations = async (req: Request, res: Response) => {
     const query = `
       SELECT
         c.id,
+        c.name,
         c.type,
+        c.join_policy,
+        c.invite_link AS invite_code,
         c.last_message_at,
         c.created_at,
         cm.last_read_at,
@@ -392,6 +395,11 @@ export const getMessages = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch messages"})
   }
+}
+
+// @route GET /api/conversations/:id/members
+export const getMembers = async (req: Request, res: Response) => {
+  
 }
 
 // @route PATCH /api/conversations/:id/read

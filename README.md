@@ -681,9 +681,9 @@ Create a new conversation group.
 
 | Field               | Type          | Required | Description                                        |
 | ------------------- | ------------- | -------- | -------------------------------------------------- |
-| `type`              | string        | Yes      | Conversation type - Group or Project.              |
+| `type`              | string        | Yes      | Conversation type - (`group` or `project`).        |
 | `name`              | string        | Yes      | Group name                                         |
-| `join_policy`       | string        | No       | Approval type - Open or Required                   |
+| `join_policy`       | string        | No       | Approval type - (`open` or `approval_required`)    |
 
 <br>
 
