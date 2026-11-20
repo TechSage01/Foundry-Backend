@@ -399,7 +399,39 @@ export const getMessages = async (req: Request, res: Response) => {
 
 // @route GET /api/conversations/:id/members
 export const getMembers = async (req: Request, res: Response) => {
-  
+  const convoId = req.params.id;
+  const userId = req.user?.id;
+
+  if (!convoId || !isUuid(convoId)) {
+    return res.status(400).json({ success: false, message: "Invalid Conversation Id" })
+  }
+
+  try {
+    const adminCheck = await pool.query(`
+      SELECT role FROM conversation_members
+      WHERE conversation_id = $1 AND user_id = $2 AND role IN ('owner', 'admin') AND status = 'active'
+    `, [convoId, userId])
+
+    if (adminCheck.rows.length === 0) {
+      return res.status(401).json({ success: false, message: "Access Denied"})
+    }
+
+    const { rows } = await pool.query(`
+      SELECT
+        cm.user_id,
+        cm.status,
+        prof.full_name,
+        prof.username,
+        prof.avatar_url
+      FROM conversation_members cm
+      JOIN profiles prof ON cm.user_id = prof.user_id
+      WHERE cm.conversation_id = $1 AND status = 'active'
+    `, [convoId])
+
+    return res.status(200).json({ success: true, data: rows })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to get members" })
+  }
 }
 
 // @route PATCH /api/conversations/:id/read
@@ -574,7 +606,7 @@ export const getPendingJoinRequests = async (req: Request, res: Response) => {
     `, [convoId, userId])
 
     if (adminCheck.rows.length === 0) {
-      return res.status(403).json({ success: false, message: "Admin Access Required" })
+      return res.status(403).json({ success: false, message: "Access Denied" })
     }
 
     const { rows } = await pool.query(`
