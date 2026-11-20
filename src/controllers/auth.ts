@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { signAccessToken, signRefreshToken } from "../utils/jwt.js";
 import pool from "../config/db.js";
 import { v4 as uuidv4 } from "uuid";
-import { blacklistToken } from "../service/redis.js";
+import { blacklistToken, getOtp, storeOtp } from "../service/redis.js";
+import { emailSchema, otpSchema } from "../schemas/auth.js";
+import { extractUsername, generateOtp } from "../utils/helpers.js";
+import { sendOtpMail } from "../service/mailer.js";
 
 export const issueCallbackToken = (req: Request, res: Response) => {
   try {
@@ -91,6 +94,94 @@ export const renewAccessToken = async (req: Request, res: Response) => {
     })
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to refresh access token" })
+  }
+}
+
+export const requestOtp = async (req: Request, res: Response) => {
+  const validation = emailSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({ 
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  }
+
+  const { email } = validation.data;
+
+  try {
+    const otp = generateOtp();
+
+    await storeOtp(email, otp);
+
+    await sendOtpMail(email, otp)
+
+    return res.status(200).json({ success: true, message: "Check your inbox for an OTP" })
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to send OTP" })
+  }
+}
+
+export const verifyOtp = async (req: Request, res: Response, next: Function) => {
+  const validation = otpSchema.safeParse(req.body);
+  if (!validation.success) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid Request",
+      errors: validation.error.flatten().fieldErrors
+    })
+  }
+
+  const { email, code } = validation.data;
+
+  const client = await pool.connect();
+
+  try {
+    // verify otp
+    const valid = await getOtp(email, code)
+    if (!valid) {
+      return res.status(403).json({ success: false, message: "Invalid Otp" })
+    }
+
+    await client.query('BEGIN')
+
+    // check user existence
+    const existingUser = await client.query(`
+      SELECT u.id, u.email, u.verified, p.username, p.full_name, p.avatar_url
+      FROM users u
+      JOIN profiles p ON u.id = p.user_id
+      WHERE u.email = $1
+    `, [email])
+
+    if (existingUser.rows.length > 0) {
+      req.user = existingUser.rows[0];
+      next();
+      return
+    }
+
+    // 2. create new user and profile
+    const userId = uuidv4();
+
+    const user = await client.query(`
+      INSERT INTO users (id, email, verified)
+      VALUES ($1, $2, TRUE)
+      RETURNING id, email, verified
+    `, [userId, email])
+
+    const username = `${extractUsername(email)}_${Math.floor(1000 + Math.random() * 9000)}`;
+
+    await client.query(`
+      INSERT INTO profiles (user_id, full_name, username)
+      VALUES ($1, $2, $3)
+      RETURNING *
+    `, [userId, extractUsername(email), username]);
+
+    await client.query('COMMIT');
+
+    req.user = user.rows[0];
+    next();
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Internal Server Error" })
   }
 }
 

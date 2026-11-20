@@ -3,13 +3,15 @@
 ## API Routes
 ### auth
 
-| Method   | Endpoint                        | Description                   |
-| -------- | ------------------------------- | ----------------------------- |
-| `GET`    | `/api/auth/google`              | Sign in with Google           |
-| `GET`    | `/api/auth/github`              | Sign in with GitHub           |
-| `GET`    | `/api/auth/me`                  | Fetch user                    |
-| `GET`    | `/api/auth/refresh`             | Renew Access Token            |
-| `POST`   | `/api/auth/logout`              | Logout current session        |
+| Method   | Endpoint                        | Description                        |
+| -------- | ------------------------------- | ---------------------------------- |
+| `GET`    | `/api/auth/google`              | Sign in with Google                |
+| `GET`    | `/api/auth/github`              | Sign in with GitHub                |
+| `GET`    | `/api/auth/me`                  | Fetch user                         |
+| `GET`    | `/api/auth/refresh`             | Renew Access Token                 |
+| `POST`   | `/api/auth/logout`              | Logout current session             |
+| `POST`   | `/api/auth/request-otp`         | Sign in with email                 |
+| `POST`   | `/api/auth/verify-otp`          | Otp verification & account signin  |
 
 
 ### profile
@@ -205,6 +207,39 @@
 ## Docs
 
 <br>
+
+**`POST /api/auth/request-otp`**
+
+Sign in with email
+
+**Request Body**
+
+```json
+{
+  "email": "string"
+}
+```
+
+<br>
+
+---
+
+**`POST /api/auth/verify-otp`**
+
+OTP verification & account signin
+
+**Request Body**
+
+```json
+{
+  "email": "string",
+  "code": "string"
+}
+```
+
+<br>
+
+---
 
 **`GET /api/users`**
 

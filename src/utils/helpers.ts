@@ -9,6 +9,11 @@ export interface CommentNode {
   replies: CommentNode[];
 }
 
+export const extractUsername = (email: string) => {
+  return email.split("@")[0];
+}
+
+
 export const slugify = (title: string): string => {
   const cleanTitle = title
     .toLowerCase()
@@ -52,6 +57,13 @@ export const shortenSm = (text: string): string => {
 
   return `${safeCut.trimEnd()}...`;
 }
+
+export const generateOtp = (): string => {
+  return Math.floor(Math.random() * 1000000)
+    .toString()
+    .padStart(6, '0');
+}
+
 
 export const buildCommentTree = (flatComments: any[]): CommentNode[] => {
   const map = new Map<string, CommentNode>();
