@@ -46,6 +46,48 @@ export const issueCallbackToken = (req: Request, res: Response) => {
   }
 }
 
+export const sendRedirect = (req: Request, res: Response) => {
+  try {
+    const user = req.user as any;
+
+    const accessToken = signAccessToken(user.id)
+    const refreshToken = signRefreshToken(user.id)
+
+    if (process.env.NODE_ENV === "production") {
+      // access token
+      res.cookie("foundry_token", accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 30 * 60 * 1000 // 30 mins
+      })
+
+      // refresh token
+      res.cookie("foundry_refresh", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      })
+
+      return res.status(200).json({ 
+        success: true, 
+        redirectUrl: `${process.env.CLIENT_URL}/auth/callback` 
+      })
+    }
+
+    // auth headers for dev
+    return res.status(200).json({ 
+      success: true, 
+      message: "Authentication Successful", 
+      accessToken: accessToken,
+      refreshToken: refreshToken 
+    })
+  } catch (error) {
+    res.redirect(`${process.env.CLIENT_URL}/signin?error=${error}`)
+  }
+}
+
 // @route GET /api/auth/me
 // @desc Get user details
 // @access Authenticated users only
@@ -97,6 +139,9 @@ export const renewAccessToken = async (req: Request, res: Response) => {
   }
 }
 
+// @route POST /api/auth/request-otp
+// @desc Signin with email
+// @access Public
 export const requestOtp = async (req: Request, res: Response) => {
   const validation = emailSchema.safeParse(req.body);
   if (!validation.success) {
@@ -122,6 +167,9 @@ export const requestOtp = async (req: Request, res: Response) => {
   }
 }
 
+// @route POST /api/auth/verify-otp
+// @desc OTP verification & account signin
+// @access Public
 export const verifyOtp = async (req: Request, res: Response, next: Function) => {
   const validation = otpSchema.safeParse(req.body);
   if (!validation.success) {

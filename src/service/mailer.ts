@@ -3,7 +3,7 @@ import { Resend } from "resend";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const generateHtml = (code: string) => {
-  return`
+  return `
     <html>
     <body>
       <h3>
@@ -11,7 +11,7 @@ const generateHtml = (code: string) => {
       </h3>
     </body>
     </html>
-    `;
+  `;
 }
 
 export const sendOtpMail = async (to: string, code: string) => { 

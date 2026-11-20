@@ -1,6 +1,6 @@
 import { Router } from "express";
 import passport from "../config/passport.js"
-import { getMe, issueCallbackToken, logout, renewAccessToken, requestOtp, signin, verifyOtp } from "../controllers/auth.js";
+import { getMe, issueCallbackToken, logout, renewAccessToken, requestOtp, sendRedirect, signin, verifyOtp } from "../controllers/auth.js";
 import { authMiddleware, requireRefreshToken } from "../middlewares/auth.js";
 import { authLimiter } from "../middlewares/limiter.js";
 
@@ -27,7 +27,7 @@ router.get("/github/callback",
 )
 
 router.post("/request-otp", authLimiter, requestOtp)
-router.post("/verify-otp", authLimiter, verifyOtp, issueCallbackToken)
+router.post("/verify-otp", authLimiter, verifyOtp, sendRedirect)
 router.post("/logout", authMiddleware, logout)
 
 if (process.env.NODE_ENV !== "production") {
