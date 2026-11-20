@@ -30,3 +30,18 @@ export const uploadLimiter = rateLimit({
     message: 'Upload limit reached. Please wait 15 minutes before uploading more files.',
   },
 });
+
+export const authLimiter = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req: Request) => {
+    if (req.user?.id) return `user:${req.user.id}`;
+    return ipKeyGenerator(req.ip ?? "unknown")
+  },
+  message: {
+    success: false,
+    message: 'Signin limit reached. Please wait 5 minutes before trying again.',
+  },
+});
